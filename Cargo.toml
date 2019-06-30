@@ -4,6 +4,14 @@ version = "0.1.0"
 authors = ["g2_xpf <nameko.jack@gmail.com>"]
 edition = "2018"
 
+[[bin]]
+name = "game"
+path = "src/main.rs"
+
+[lib]
+name = "state_controller"
+path = "src/lib/lib.rs"
+
 [dependencies]
 glium = "0.23.0"
 cgmath = "0.17.0"
