@@ -85,7 +85,11 @@ impl StateController<Running> {
             .unwrap_or_else(|| panic!("Tried to make a transition to the unregistered state"));
 
         // send M from S1 to S2
-        next_state.downcast_mut::<S2>().unwrap().receive(message);
+        next_state
+            .as_mut()
+            .downcast_mut::<S2>()
+            .unwrap()
+            .receive(message);
 
         // set next state
         let next_state_id = StateID::of::<S2>();

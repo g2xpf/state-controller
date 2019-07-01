@@ -1,8 +1,6 @@
 extern crate state_controller;
 
-use state_controller::{
-    ControllerMode::Running, Renderable, State, StateController, Updatable, World,
-};
+use state_controller::{ControllerMode::Running, Renderable, StateController, Updatable, World};
 
 #[derive(Default)]
 struct InitState {
@@ -24,8 +22,6 @@ impl Updatable for InitState {
         std::thread::sleep(std::time::Duration::from_millis(1000));
     }
 }
-
-impl State for InitState {}
 
 fn main() {
     let init_state: InitState = Default::default();

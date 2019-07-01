@@ -2,32 +2,39 @@ use crate::{
     traits::{Renderable, Updatable},
     types::StateID,
 };
-use std::any::Any;
 
-pub trait State: Updatable + Renderable {}
+pub trait State: Updatable + Renderable + 'static {
+    fn state_id(&self) -> StateID;
+}
+
+impl<S> State for S
+where
+    S: Updatable + Renderable + 'static,
+{
+    fn state_id(&self) -> StateID {
+        StateID::of::<S>()
+    }
+}
 
 impl dyn State {
     #[inline]
-    pub fn is<T>(&self) -> bool
-    where
-        T: Any,
-    {
-        StateID::of::<T>() == State::type_id(self)
+    pub fn is<S: State>(&self) -> bool {
+        StateID::of::<S>() == State::state_id(self)
     }
 
     #[inline]
-    pub fn downcast_ref<T: Any>(&self) -> Option<&T> {
-        if self.is::<T>() {
-            unsafe { Some(&*(self as *const dyn State as *const T)) }
+    pub fn downcast_ref<S: State + 'static>(&self) -> Option<&S> {
+        if self.is::<S>() {
+            unsafe { Some(&*(self as *const dyn State as *const S)) }
         } else {
             None
         }
     }
 
     #[inline]
-    pub fn downcast_mut<T: Any>(&mut self) -> Option<&mut T> {
-        if self.is::<T>() {
-            unsafe { Some(&mut *(self as *mut dyn State as *mut T)) }
+    pub fn downcast_mut<S: State>(&mut self) -> Option<&mut S> {
+        if self.is::<S>() {
+            unsafe { Some(&mut *(self as *mut dyn State as *mut S)) }
         } else {
             None
         }
