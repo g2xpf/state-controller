@@ -5,6 +5,8 @@ pub mod state_controller;
 pub mod traits;
 mod types;
 pub mod world;
+#[macro_use]
+pub mod macros;
 
 pub use crate::state_controller::StateController;
 pub use controller_mode as ControllerMode;
