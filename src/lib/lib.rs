@@ -6,8 +6,8 @@ pub mod traits;
 mod types;
 pub mod world;
 
+pub use crate::state_controller::StateController;
 pub use controller_mode as ControllerMode;
 pub use state::State;
-pub use state_controller::StateController;
 pub use traits::{Renderable, Updatable};
 pub use world::World;
