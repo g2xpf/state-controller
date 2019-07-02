@@ -6,5 +6,5 @@ where
 {
     type Message: Clone;
 
-    fn receive(&mut self, message: Self::Message);
+    fn receive(&mut self, message: Self::Message) {}
 }
