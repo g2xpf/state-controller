@@ -7,20 +7,30 @@ pub struct InitState {
     counter: u64,
 }
 
+impl Receiver<SecondState> for InitState {
+    type Message = u64;
+
+    fn receive(&mut self, message: Self::Message) {
+        println!("### message received from SecondState: {:?} ###", message);
+        self.counter = message;
+    }
+}
+
 impl Renderable for InitState {
     fn render(&self) {
         println!(
             "InitState is rendering...\ncurrent count is: {}",
             self.counter
         );
+        std::thread::sleep(std::time::Duration::from_millis(16));
     }
 }
 
 impl Updatable for InitState {
     fn update(&mut self, state_controller: &mut StateController<Running>) {
         self.counter += 1;
-        std::thread::sleep(std::time::Duration::from_millis(16));
-        if self.counter >= 10 {
+
+        if self.counter % 10 == 0 {
             state_controller.shift::<Self, SecondState>(self.counter);
         }
     }
@@ -35,7 +45,7 @@ impl Receiver<InitState> for SecondState {
     type Message = u64;
 
     fn receive(&mut self, message: Self::Message) {
-        println!("### message received: {:?} ###", message);
+        println!("### message received from InitState: {:?} ###", message);
         self.counter = message;
     }
 }
@@ -46,21 +56,24 @@ impl Renderable for SecondState {
             "SecondState is rendering...\ncurrent count is: {}",
             self.counter
         );
+        std::thread::sleep(std::time::Duration::from_millis(16));
     }
 }
 
 impl Updatable for SecondState {
-    fn update(&mut self, _state_controller: &mut StateController<Running>) {
+    fn update(&mut self, state_controller: &mut StateController<Running>) {
         self.counter += 1;
-        std::thread::sleep(std::time::Duration::from_millis(16));
-        if self.counter >= 30 {
-            std::process::exit(0);
+
+        match self.counter % 20 {
+            0 if self.counter == 40 => std::process::exit(0),
+            0 => state_controller.shift::<Self, InitState>(self.counter),
+            _ => (),
         }
     }
 }
 
 #[test]
-fn two_states_test() {
+fn state_loop_test() {
     let init_state: InitState = Default::default();
     let second_state: SecondState = Default::default();
     let mut world = World::new(init_state);
