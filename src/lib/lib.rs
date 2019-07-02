@@ -1,14 +1,13 @@
-pub mod controller_mode;
-pub mod receiver;
-pub mod state;
-pub mod state_controller;
-pub mod traits;
+mod controller_mode;
+mod receiver;
+mod state;
+mod state_controller;
+mod traits;
 mod types;
-pub mod world;
+mod world;
 
-pub use crate::state_controller::StateController;
-pub use controller_mode as ControllerMode;
 pub use receiver::Receiver;
 pub use state::State;
 pub use traits::{Renderable, Updatable};
+pub use types::Shifter;
 pub use world::World;

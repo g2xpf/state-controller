@@ -1,6 +1,4 @@
-use state_controller::{
-    ControllerMode::Running, Receiver, Renderable, StateController, Updatable, World,
-};
+use state_controller::{Receiver, Renderable, Shifter, Updatable, World};
 
 #[derive(Default)]
 pub struct InitState {
@@ -36,7 +34,7 @@ impl Renderable for InitState {
 }
 
 impl Updatable for InitState {
-    fn update(&mut self, state_controller: &mut StateController<Running>) {
+    fn update(&mut self, state_controller: &mut Shifter) {
         self.counter += 1;
 
         match self.counter {
@@ -73,7 +71,7 @@ impl Renderable for SecondState {
 }
 
 impl Updatable for SecondState {
-    fn update(&mut self, state_controller: &mut StateController<Running>) {
+    fn update(&mut self, state_controller: &mut Shifter) {
         self.counter += 1;
 
         if self.counter == 20 {
@@ -107,7 +105,7 @@ impl Renderable for ThirdState {
 }
 
 impl Updatable for ThirdState {
-    fn update(&mut self, state_controller: &mut StateController<Running>) {
+    fn update(&mut self, state_controller: &mut Shifter) {
         self.counter += 1;
 
         if self.counter == 40 {

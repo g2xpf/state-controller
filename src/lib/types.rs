@@ -1,6 +1,7 @@
-use crate::state::State;
+use crate::{controller_mode::Running, state::State, state_controller::StateController};
 use std::ops::{Deref, DerefMut};
 
+pub type Shifter = StateController<Running>;
 pub(crate) type StateID = std::any::TypeId;
 pub(crate) struct StateEntry(pub(crate) StateID, pub(crate) Box<dyn State>);
 
