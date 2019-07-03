@@ -1,5 +1,5 @@
 use glium::{Frame, Surface};
-use state_controller::{EventHandler, Receiver, Renderable, Shifter, Updatable, World};
+use state_controller::{EventHandler, Receiver, Renderable, Shifter, State, Updatable, World};
 
 #[derive(Default)]
 pub struct InitState {
@@ -51,6 +51,8 @@ impl Updatable for InitState {
     }
 }
 
+impl State for InitState {}
+
 #[derive(Default)]
 pub struct SecondState {
     counter: u64,
@@ -87,6 +89,8 @@ impl Updatable for SecondState {
 }
 
 impl EventHandler for SecondState {}
+
+impl State for SecondState {}
 
 #[derive(Default)]
 pub struct ThirdState {
@@ -125,6 +129,7 @@ impl Updatable for ThirdState {
 }
 
 impl EventHandler for ThirdState {}
+impl State for ThirdState {}
 
 #[test]
 fn two_ways_shift() {

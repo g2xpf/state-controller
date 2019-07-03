@@ -1,7 +1,7 @@
 extern crate state_controller;
 
 use glium::{Frame, Surface};
-use state_controller::{EventHandler, Renderable, Shifter, Updatable, World};
+use state_controller::{EventHandler, Renderable, Shifter, State, Updatable, World};
 
 #[derive(Default)]
 pub struct InitState {
@@ -29,6 +29,7 @@ impl Updatable for InitState {
 }
 
 impl EventHandler for InitState {}
+impl State for InitState {}
 
 #[test]
 fn one_state() {

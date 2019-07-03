@@ -4,7 +4,7 @@ use glium::{
     glutin::{self, Event},
     Frame, Surface,
 };
-use state_controller::{EventHandler, Renderable, Shifter, Updatable, World};
+use state_controller::{EventHandler, Renderable, Shifter, State, Updatable, World};
 
 #[derive(Default)]
 struct InitState {
@@ -53,6 +53,8 @@ impl EventHandler for InitState {
         println!("{:?}\n", event);
     }
 }
+
+impl State for InitState {}
 
 fn main() {
     let events_loop = glutin::EventsLoop::new();

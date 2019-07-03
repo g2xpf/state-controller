@@ -45,10 +45,16 @@ impl StateController<Running> {
             .for_each(|ev| self.current_state.handle(&ev));
     }
 
+    pub fn initialize(&mut self) {
+        self.current_state.initialize();
+    }
+
     pub fn update(&mut self) {
         self.current_state.update(&mut self.state_shifter);
 
         if let Some(mut next_state_entry) = self.state_shifter.try_update() {
+            self.current_state.finalize();
+            next_state_entry.initialize();
             mem::swap(&mut self.current_state, &mut next_state_entry);
             self.state_shifter.insert_current_state(next_state_entry);
         }

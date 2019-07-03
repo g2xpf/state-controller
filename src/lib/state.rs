@@ -2,24 +2,20 @@ use crate::{
     traits::{EventHandler, Renderable, Updatable},
     types::StateID,
 };
+use std::any::Any;
 
-pub trait State: Updatable + Renderable + EventHandler + 'static {
-    fn state_id(&self) -> StateID;
-}
+pub trait State: Updatable + Renderable + EventHandler + Any + 'static {
+    // run when transitioning to this state
+    fn initialize(&mut self) {}
 
-impl<S> State for S
-where
-    S: Updatable + Renderable + EventHandler + 'static,
-{
-    fn state_id(&self) -> StateID {
-        StateID::of::<S>()
-    }
+    // run when transitioning to this state
+    fn finalize(&mut self) {}
 }
 
 impl dyn State {
     #[inline]
     pub fn is<S: State>(&self) -> bool {
-        StateID::of::<S>() == State::state_id(self)
+        StateID::of::<S>() == Any::type_id(self)
     }
 
     #[inline]

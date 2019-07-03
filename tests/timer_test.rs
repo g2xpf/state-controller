@@ -1,11 +1,15 @@
 extern crate state_controller;
 
 use glium::{Frame, Surface};
-use state_controller::{EventHandler, Renderable, Shifter, Updatable, World};
-
+use state_controller::{
+    utils::{Linear, Timer},
+    EventHandler, Renderable, Shifter, State, Updatable, World,
+};
 #[derive(Default)]
+
 pub struct InitState {
     counter: u64,
+    timer: Timer,
 }
 
 impl Renderable for InitState {
@@ -21,15 +25,21 @@ impl Renderable for InitState {
 
 impl Updatable for InitState {
     fn update(&mut self, _state_controller: &mut Shifter) {
-        std::thread::sleep(std::time::Duration::from_millis(16));
-        self.counter += 1;
-        if self.counter >= 10 {
+        if let Some(ratio) = self.timer.get_ratio_easing::<Linear>() {
+            println!("progress: {}", ratio);
+        } else {
             std::process::exit(0);
         }
     }
 }
 
 impl EventHandler for InitState {}
+impl State for InitState {
+    fn initialize(&mut self) {
+        self.timer = Timer::from_secs(3);
+        self.timer.start();
+    }
+}
 
 #[test]
 fn one_state() {

@@ -5,7 +5,6 @@ use std::time::{Duration, Instant};
 pub struct Timer {
     limit: Duration,
     timer: Option<Instant>,
-    timeover: bool,
 }
 
 impl Timer {
@@ -13,7 +12,6 @@ impl Timer {
         Timer {
             limit: Duration::from_secs(limit),
             timer: None,
-            timeover: false,
         }
     }
 
@@ -21,7 +19,6 @@ impl Timer {
         Timer {
             limit: Duration::from_millis(limit),
             timer: None,
-            timeover: false,
         }
     }
 
@@ -29,7 +26,6 @@ impl Timer {
         Timer {
             limit: Duration::from_micros(limit),
             timer: None,
-            timeover: false,
         }
     }
 
@@ -37,7 +33,6 @@ impl Timer {
         Timer {
             limit: Duration::from_nanos(limit),
             timer: None,
-            timeover: false,
         }
     }
 
@@ -49,14 +44,18 @@ impl Timer {
         self.timer = None;
     }
 
+    pub fn restart(&mut self) {
+        self.start();
+    }
+
     pub fn get_ratio(&mut self) -> Option<f64> {
-        if self.timeover {
+        if self.timer.is_none() {
             return None;
         }
 
         let current_duration = self.timer.unwrap().elapsed();
         if current_duration > self.limit {
-            self.timeover = true;
+            self.timer = None;
             return Some(1.0);
         }
         let ratio = current_duration.as_nanos() as f64 / self.limit.as_nanos() as f64;

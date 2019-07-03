@@ -1,5 +1,5 @@
 use glium::{Frame, Surface};
-use state_controller::{EventHandler, Receiver, Renderable, Shifter, Updatable, World};
+use state_controller::{EventHandler, Receiver, Renderable, Shifter, State, Updatable, World};
 
 #[derive(Default)]
 pub struct InitState {
@@ -37,6 +37,7 @@ impl Updatable for InitState {
 }
 
 impl EventHandler for InitState {}
+impl State for InitState {}
 
 #[derive(Default)]
 pub struct SecondState {
@@ -77,6 +78,7 @@ impl Updatable for SecondState {
 }
 
 impl EventHandler for SecondState {}
+impl State for SecondState {}
 
 #[test]
 fn state_loop_test() {

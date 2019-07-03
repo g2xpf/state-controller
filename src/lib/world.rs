@@ -50,6 +50,7 @@ impl World<Running> {
     }
 
     pub fn run(&mut self) {
+        self.state_controller.initialize();
         loop {
             // event handling
             let events = self.get_events();
