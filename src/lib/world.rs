@@ -8,6 +8,7 @@ use glium::{
     glutin::{Event, EventsLoop},
     Display,
 };
+use std::mem;
 
 pub struct World<M> {
     state_controller: StateController<M>,
@@ -64,7 +65,7 @@ impl World<Running> {
             // update
             self.current_state.update(&mut self.state_controller);
             if let Some(mut next_state_entry) = self.state_controller.try_update() {
-                std::mem::swap(&mut self.current_state, &mut next_state_entry);
+                mem::swap(&mut self.current_state, &mut next_state_entry);
                 self.state_controller.insert_current_state(next_state_entry);
             }
 
