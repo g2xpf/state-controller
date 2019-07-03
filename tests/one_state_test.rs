@@ -1,7 +1,7 @@
 extern crate state_controller;
 
-use glium::{glutin::Event, Frame, Surface};
-use state_controller::{Renderable, Shifter, Updatable, World};
+use glium::{Frame, Surface};
+use state_controller::{EventHandler, Renderable, Shifter, Updatable, World};
 
 #[derive(Default)]
 pub struct InitState {
@@ -20,7 +20,7 @@ impl Renderable for InitState {
 }
 
 impl Updatable for InitState {
-    fn update(&mut self, _state_controller: &mut Shifter, _events: &Vec<Event>) {
+    fn update(&mut self, _state_controller: &mut Shifter) {
         self.counter += 1;
         std::thread::sleep(std::time::Duration::from_millis(16));
         if self.counter >= 10 {
@@ -28,6 +28,8 @@ impl Updatable for InitState {
         }
     }
 }
+
+impl EventHandler for InitState {}
 
 #[test]
 fn one_state() {

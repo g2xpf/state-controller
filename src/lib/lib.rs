@@ -8,6 +8,6 @@ mod world;
 
 pub use receiver::Receiver;
 pub use state::State;
-pub use traits::{Renderable, Updatable};
+pub use traits::{EventHandler, Renderable, Updatable};
 pub use types::Shifter;
 pub use world::World;

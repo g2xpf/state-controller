@@ -55,13 +55,20 @@ impl World<Running> {
 
     pub fn run(&mut self) {
         loop {
+            // event handling
             let events = self.get_events();
-            self.current_state
-                .update(&mut self.state_controller, &events);
+            events
+                .into_iter()
+                .for_each(|ev| self.current_state.handle(&ev));
+
+            // update
+            self.current_state.update(&mut self.state_controller);
             if let Some(mut next_state_entry) = self.state_controller.try_update() {
                 std::mem::swap(&mut self.current_state, &mut next_state_entry);
                 self.state_controller.insert_current_state(next_state_entry);
             }
+
+            // rendering
             let mut frame = self.display.draw();
             self.current_state.render(&mut frame);
         }

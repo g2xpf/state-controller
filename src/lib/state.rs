@@ -1,15 +1,15 @@
 use crate::{
-    traits::{Renderable, Updatable},
+    traits::{EventHandler, Renderable, Updatable},
     types::StateID,
 };
 
-pub trait State: Updatable + Renderable + 'static {
+pub trait State: Updatable + Renderable + EventHandler + 'static {
     fn state_id(&self) -> StateID;
 }
 
 impl<S> State for S
 where
-    S: Updatable + Renderable + 'static,
+    S: Updatable + Renderable + EventHandler + 'static,
 {
     fn state_id(&self) -> StateID {
         StateID::of::<S>()

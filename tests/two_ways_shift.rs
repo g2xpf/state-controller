@@ -1,5 +1,5 @@
-use glium::{glutin::Event, Frame, Surface};
-use state_controller::{Receiver, Renderable, Shifter, Updatable, World};
+use glium::{Frame, Surface};
+use state_controller::{EventHandler, Receiver, Renderable, Shifter, Updatable, World};
 
 #[derive(Default)]
 pub struct InitState {
@@ -24,6 +24,8 @@ impl Receiver<ThirdState> for InitState {
     }
 }
 
+impl EventHandler for InitState {}
+
 impl Renderable for InitState {
     fn render(&self, frame: &mut Frame) {
         println!(
@@ -37,7 +39,7 @@ impl Renderable for InitState {
 }
 
 impl Updatable for InitState {
-    fn update(&mut self, state_controller: &mut Shifter, _events: &Vec<Event>) {
+    fn update(&mut self, state_controller: &mut Shifter) {
         self.counter += 1;
 
         match self.counter {
@@ -75,7 +77,7 @@ impl Renderable for SecondState {
 }
 
 impl Updatable for SecondState {
-    fn update(&mut self, state_controller: &mut Shifter, _events: &Vec<Event>) {
+    fn update(&mut self, state_controller: &mut Shifter) {
         self.counter += 1;
 
         if self.counter == 20 {
@@ -83,6 +85,8 @@ impl Updatable for SecondState {
         }
     }
 }
+
+impl EventHandler for SecondState {}
 
 #[derive(Default)]
 pub struct ThirdState {
@@ -111,7 +115,7 @@ impl Renderable for ThirdState {
 }
 
 impl Updatable for ThirdState {
-    fn update(&mut self, state_controller: &mut Shifter, _events: &Vec<Event>) {
+    fn update(&mut self, state_controller: &mut Shifter) {
         self.counter += 1;
 
         if self.counter == 40 {
@@ -119,6 +123,8 @@ impl Updatable for ThirdState {
         }
     }
 }
+
+impl EventHandler for ThirdState {}
 
 #[test]
 fn two_ways_shift() {
