@@ -1,10 +1,8 @@
-use crate::{controller_mode::Running, state_controller::StateController};
+use crate::types::Shifter;
 use glium::{glutin::Event, Frame};
 
 pub trait Updatable {
-    fn update(&mut self, _state_controller: &mut StateController<Running>) {}
-    fn before_shift(&mut self) {}
-    fn after_shift(&mut self) {}
+    fn update(&mut self, _state_controller: &mut Shifter) {}
 }
 
 pub trait Renderable {

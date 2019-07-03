@@ -1,49 +1,25 @@
 use crate::{
     controller_mode::{Pending, Running},
-    receiver::Receiver,
     state::State,
-    types::{StateEntry, StateID},
+    state_shifter::StateShifter,
+    types::StateEntry,
 };
-use std::{any::TypeId, collections::HashMap, marker::PhantomData};
+use glium::{glutin::Event, Frame};
+use std::mem;
 
-pub struct StateController<M> {
-    states: HashMap<StateID, Box<dyn State>>,
-    next_state: Option<StateEntry>,
-    controller_mode: PhantomData<M>,
-}
-
-impl<M> StateController<M> {
-    fn remove<S>(&mut self) -> Option<Box<dyn State>>
-    where
-        S: State + 'static,
-    {
-        let state_id = TypeId::of::<S>();
-        self.states.remove(&state_id)
-    }
-
-    fn insert<S>(&mut self, state: Box<dyn State>)
-    where
-        S: State + 'static,
-    {
-        let state_id = TypeId::of::<S>();
-        self.states.insert(state_id, state);
-    }
-
-    pub(crate) fn insert_current_state(&mut self, state_entry: StateEntry) {
-        let StateEntry(state_id, state) = state_entry;
-        self.states.insert(state_id, state);
-    }
+pub struct StateController<T> {
+    state_shifter: StateShifter<T>,
+    current_state: StateEntry,
 }
 
 impl StateController<Pending> {
-    pub fn new<S>() -> Self
+    pub fn new<S>(initial_state: S) -> Self
     where
         S: State + 'static,
     {
         StateController {
-            states: HashMap::new(),
-            next_state: None,
-            controller_mode: PhantomData,
+            state_shifter: StateShifter::new::<S>(),
+            current_state: StateEntry::new(initial_state),
         }
     }
 
@@ -51,49 +27,34 @@ impl StateController<Pending> {
     where
         S: State + 'static,
     {
-        self.insert::<S>(Box::new(state) as Box<dyn State>);
+        self.state_shifter.register(state);
     }
 
     pub fn run(self) -> StateController<Running> {
         StateController {
-            states: self.states,
-            next_state: None,
-            controller_mode: PhantomData,
+            state_shifter: self.state_shifter.run(),
+            current_state: self.current_state,
         }
     }
 }
 
 impl StateController<Running> {
-    pub(crate) fn try_update(&mut self) -> Option<StateEntry> {
-        let next_state = self.next_state.take()?;
-        Some(next_state)
+    pub(crate) fn handle_events(&mut self, events: &Vec<Event>) {
+        events
+            .into_iter()
+            .for_each(|ev| self.current_state.handle(&ev));
     }
 
-    pub fn shift<S1, S2>(&mut self, message: <S2 as Receiver<S1>>::Message)
-    where
-        S1: State + 'static,
-        S2: State + 'static,
-        S2: Receiver<S1>,
-    {
-        if self.next_state.is_some() {
-            panic!("Cannot set the next state twice");
+    pub fn update(&mut self) {
+        self.current_state.update(&mut self.state_shifter);
+
+        if let Some(mut next_state_entry) = self.state_shifter.try_update() {
+            mem::swap(&mut self.current_state, &mut next_state_entry);
+            self.state_shifter.insert_current_state(next_state_entry);
         }
+    }
 
-        // fetch next state
-        let mut next_state = self
-            .remove::<S2>()
-            .unwrap_or_else(|| panic!("Tried to make a transition to the unregistered state"));
-
-        // send M from S1 to S2
-        next_state
-            .as_mut()
-            .downcast_mut::<S2>()
-            .unwrap()
-            .receive(message);
-
-        // set next state
-        let next_state_id = StateID::of::<S2>();
-
-        self.next_state = Some(StateEntry(next_state_id, next_state));
+    pub fn render(&mut self, frame: &mut Frame) {
+        self.current_state.render(frame);
     }
 }

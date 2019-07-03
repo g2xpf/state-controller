@@ -21,6 +21,7 @@ impl Renderable for InitState {
 
 impl Updatable for InitState {
     fn update(&mut self, _state_controller: &mut Shifter) {
+        std::thread::sleep(std::time::Duration::from_millis(16));
         self.counter += 1;
         if self.counter >= 10 {
             std::process::exit(0);

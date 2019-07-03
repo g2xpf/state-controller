@@ -2,6 +2,7 @@ mod controller_mode;
 mod receiver;
 mod state;
 mod state_controller;
+mod state_shifter;
 mod traits;
 mod types;
 pub mod utils;

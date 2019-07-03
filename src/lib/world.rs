@@ -2,17 +2,14 @@ use crate::{
     controller_mode::{Pending, Running},
     state::State,
     state_controller::StateController,
-    types::{StateEntry, StateID},
 };
 use glium::{
     glutin::{Event, EventsLoop},
     Display,
 };
-use std::mem;
 
 pub struct World<M> {
     state_controller: StateController<M>,
-    current_state: StateEntry,
     events_loop: EventsLoop,
     display: Display,
 }
@@ -23,8 +20,7 @@ impl World<Pending> {
         S: State + 'static,
     {
         World {
-            state_controller: StateController::new::<S>(),
-            current_state: StateEntry(StateID::of::<S>(), Box::new(initial_state)),
+            state_controller: StateController::new::<S>(initial_state),
             events_loop,
             display,
         }
@@ -40,7 +36,6 @@ impl World<Pending> {
     pub fn finalize(self) -> World<Running> {
         World {
             state_controller: self.state_controller.run(),
-            current_state: self.current_state,
             events_loop: self.events_loop,
             display: self.display,
         }
@@ -58,20 +53,14 @@ impl World<Running> {
         loop {
             // event handling
             let events = self.get_events();
-            events
-                .into_iter()
-                .for_each(|ev| self.current_state.handle(&ev));
+            self.state_controller.handle_events(&events);
 
             // update
-            self.current_state.update(&mut self.state_controller);
-            if let Some(mut next_state_entry) = self.state_controller.try_update() {
-                mem::swap(&mut self.current_state, &mut next_state_entry);
-                self.state_controller.insert_current_state(next_state_entry);
-            }
+            self.state_controller.update();
 
             // rendering
             let mut frame = self.display.draw();
-            self.current_state.render(&mut frame);
+            self.state_controller.render(&mut frame);
         }
     }
 }

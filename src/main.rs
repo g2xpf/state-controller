@@ -23,7 +23,7 @@ impl Renderable for InitState {
 }
 
 impl Updatable for InitState {
-    fn update(&mut self, _state_controller: &mut Shifter) {
+    fn update(&mut self, _shifter: &mut Shifter) {
         self.counter += 1;
     }
 }
