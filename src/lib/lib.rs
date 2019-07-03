@@ -4,6 +4,7 @@ mod state;
 mod state_controller;
 mod traits;
 mod types;
+pub mod utils;
 mod world;
 
 pub use receiver::Receiver;
