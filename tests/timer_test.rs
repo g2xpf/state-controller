@@ -24,7 +24,7 @@ impl Renderable for InitState {
 }
 
 impl Updatable for InitState {
-    fn update(&mut self, _state_controller: &mut Shifter) {
+    fn update(&mut self, _shifter: &mut Shifter) {
         if let Some(ratio) = self.timer.get_ratio_easing::<Linear>() {
             println!("progress: {}", ratio);
         } else {
