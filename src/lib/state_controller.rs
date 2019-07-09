@@ -1,10 +1,11 @@
 use crate::{
     controller_mode::{Pending, Running},
+    event::Event,
     state::State,
     state_shifter::StateShifter,
-    types::StateEntry,
+    types::state_entry::StateEntry,
 };
-use glium::{glutin::Event, Frame};
+use glium::Frame;
 use std::mem;
 
 pub struct StateController<T> {
@@ -39,10 +40,8 @@ impl StateController<Pending> {
 }
 
 impl StateController<Running> {
-    pub(crate) fn handle_events(&mut self, events: &Vec<Event>) {
-        events
-            .into_iter()
-            .for_each(|ev| self.current_state.handle(&ev));
+    pub(crate) fn handle_events(&mut self, event: &Event) {
+        self.current_state.handle(&event);
     }
 
     pub fn initialize(&mut self) {

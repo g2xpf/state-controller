@@ -1,3 +1,4 @@
+#[derive(Copy, Clone, Debug)]
 pub struct MotionEvent {
     delta: (f64, f64),
 }

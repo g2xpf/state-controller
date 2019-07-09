@@ -1,5 +1,6 @@
-use crate::types::Key;
+use crate::types::key::{virtual_keycode_to_key, Key};
 use glium::glutin;
+use std::fmt;
 
 const CODE_KINDS: usize = 161;
 
@@ -12,7 +13,11 @@ pub struct KeyEntry {
 
 impl KeyEntry {
     pub fn new() -> Self {
-        Default::default()
+        KeyEntry {
+            pressed: false,
+            up_times: 0,
+            down_times: 0,
+        }
     }
 
     pub fn reset(&mut self) {
@@ -47,6 +52,18 @@ pub struct KeyEvent {
     changed: Vec<Key>,
 }
 
+impl fmt::Debug for KeyEvent {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.debug_list()
+            .entries(
+                self.changed
+                    .iter()
+                    .map(|key| (key, self.keys[*key as usize])),
+            )
+            .finish()
+    }
+}
+
 impl KeyEvent {
     pub fn new() -> Self {
         KeyEvent {
@@ -69,19 +86,19 @@ impl KeyEvent {
 
     pub fn register_key(&mut self, keyboard_input: &glutin::KeyboardInput) {
         if let Some(key_code) = keyboard_input.virtual_keycode {
-            self.changed.push(key_code);
+            self.changed.push(virtual_keycode_to_key(key_code));
             let key_entry = &mut self.keys[key_code as usize];
 
             match keyboard_input.state {
                 glutin::ElementState::Pressed => {
                     if !key_entry.pressed {
-                        key_entry.up_times += 1;
+                        key_entry.down_times += 1;
                     }
                     key_entry.pressed = true;
                 }
                 glutin::ElementState::Released => {
                     if key_entry.pressed {
-                        key_entry.down_times += 1;
+                        key_entry.up_times += 1;
                     }
                     key_entry.pressed = false;
                 }

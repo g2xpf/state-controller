@@ -1,10 +1,7 @@
 extern crate state_controller;
 
-use glium::{
-    glutin::{self, Event},
-    Frame, Surface,
-};
-use state_controller::{EventHandler, Renderable, Shifter, State, Updatable, World};
+use glium::{glutin, Frame, Surface};
+use state_controller::{Event, EventHandler, Key, Renderable, Shifter, State, Updatable, World};
 
 #[derive(Default)]
 struct InitState {
@@ -30,27 +27,10 @@ impl Updatable for InitState {
 
 impl EventHandler for InitState {
     fn handle(&mut self, event: &Event) {
-        match event {
-            glutin::Event::WindowEvent {
-                event: glutin::WindowEvent::CloseRequested,
-                ..
-            }
-            | glutin::Event::WindowEvent {
-                event:
-                    glutin::WindowEvent::KeyboardInput {
-                        input:
-                            glutin::KeyboardInput {
-                                virtual_keycode: Some(glutin::VirtualKeyCode::Escape),
-                                state: glutin::ElementState::Pressed,
-                                ..
-                            },
-                        ..
-                    },
-                ..
-            } => std::process::exit(0),
-            _ => (),
+        if event.window.close_requested || event.key(Key::Escape).is_pressed() {
+            std::process::exit(0)
         }
-        println!("{:?}\n", event);
+        println!("{:#?}\n", event);
     }
 }
 

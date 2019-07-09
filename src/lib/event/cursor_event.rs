@@ -1,5 +1,6 @@
 use crate::types::Position;
 
+#[derive(Debug, Copy, Clone)]
 pub struct CursorEvent {
     pub position: Position,
     pub entered: bool,

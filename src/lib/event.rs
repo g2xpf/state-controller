@@ -10,10 +10,11 @@ use key_event::{KeyEntry, KeyEvent};
 use motion_event::MotionEvent;
 use window_event::WindowEvent;
 
-use crate::types::Key;
+use crate::types::key::Key;
 
 use glium::glutin;
 
+#[derive(Debug)]
 pub struct Event {
     key: KeyEvent,
     pub cursor: CursorEvent,

@@ -2,7 +2,7 @@ use crate::{
     controller_mode::{Pending, Running},
     receiver::Receiver,
     state::State,
-    types::{StateEntry, StateID},
+    types::{state_entry::StateEntry, StateID},
 };
 use std::{any::TypeId, collections::HashMap, marker::PhantomData};
 

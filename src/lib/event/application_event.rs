@@ -1,3 +1,4 @@
+#[derive(Debug, Copy, Clone)]
 pub struct ApplicationEvent {
     pub awakened: bool,
     pub suspended: Option<bool>,
