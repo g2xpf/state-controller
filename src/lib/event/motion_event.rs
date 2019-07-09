@@ -12,6 +12,10 @@ impl MotionEvent {
         self.delta = (0.0, 0.0);
     }
 
+    pub fn delta(&self) -> &(f64, f64) {
+        &self.delta
+    }
+
     pub fn register_motion(&mut self, motion: &(f64, f64)) {
         self.delta.0 += motion.0;
         self.delta.1 += motion.1;

@@ -2,9 +2,9 @@ use crate::types::Position;
 
 #[derive(Debug, Copy, Clone)]
 pub struct CursorEvent {
-    pub position: Position,
-    pub entered: bool,
-    pub left: bool,
+    position: Position,
+    entered: bool,
+    left: bool,
 }
 
 impl CursorEvent {
@@ -14,6 +14,18 @@ impl CursorEvent {
             entered: false,
             left: false,
         }
+    }
+
+    pub fn position(&self) -> &Position {
+        &self.position
+    }
+
+    pub fn is_entered(&self) -> bool {
+        self.entered
+    }
+
+    pub fn is_left(&self) -> bool {
+        self.left
     }
 
     pub fn set_position(&mut self, position: &Position) {

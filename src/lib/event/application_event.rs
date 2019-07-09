@@ -1,7 +1,7 @@
 #[derive(Debug, Copy, Clone)]
 pub struct ApplicationEvent {
-    pub awakened: bool,
-    pub suspended: Option<bool>,
+    awakened: bool,
+    suspended: Option<bool>,
 }
 
 impl ApplicationEvent {
@@ -10,6 +10,14 @@ impl ApplicationEvent {
             awakened: false,
             suspended: None,
         }
+    }
+
+    pub fn awakened(&self) -> bool {
+        self.awakened
+    }
+
+    pub fn suspended(&self) -> Option<bool> {
+        self.suspended
     }
 
     pub fn set_awakened(&mut self) {
