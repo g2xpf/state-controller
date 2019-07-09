@@ -1,6 +1,8 @@
 use crate::{controller_mode::Running, state::State, state_shifter::StateShifter};
 use std::ops::{Deref, DerefMut};
 
+pub type Position = glium::glutin::dpi::LogicalPosition;
+pub type Key = glium::glutin::VirtualKeyCode;
 pub type Shifter = StateShifter<Running>;
 pub(crate) type StateID = std::any::TypeId;
 pub(crate) struct StateEntry(pub(crate) StateID, pub(crate) Box<dyn State>);
