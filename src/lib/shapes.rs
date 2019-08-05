@@ -5,9 +5,11 @@ use std::{
     rc::Rc,
 };
 
+mod circle;
 mod rectangle;
 
 pub mod primitive_shape {
+    pub use super::circle::Circle;
     pub use super::rectangle::Rectangle;
 }
 
