@@ -10,7 +10,7 @@ uniform float angle;
 vec2 rotate(vec2 v) {
     float c = cos(angle);
     float s = sin(angle);
-    return v * mat2(c, -s, s, c);
+    return mat2(c, -s, s, c) * v;
 }
 
 void main() {
