@@ -1,7 +1,14 @@
+#[macro_use]
+extern crate glium;
+
 mod controller_mode;
 mod event;
 mod event_controller;
+#[macro_use]
+pub mod macros;
 mod receiver;
+mod renderer;
+mod shapes;
 mod state;
 mod state_controller;
 mod state_shifter;
@@ -12,6 +19,8 @@ mod world;
 
 pub use event::Event;
 pub use receiver::Receiver;
+pub use renderer::RenderContext;
+pub use shapes::{primitive_shape, Shape, ShapeContainer};
 pub use state::State;
 pub use traits::{EventHandler, Renderable, Updatable};
 pub use types::key::Key;
