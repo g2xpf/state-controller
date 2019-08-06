@@ -49,4 +49,4 @@ impl Shape for Circle {
     }
 }
 
-impl_shape_container!(Circle, pos, r, color);
+impl_shape_container!(Circle; pos, r, color);
