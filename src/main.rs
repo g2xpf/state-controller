@@ -1,8 +1,10 @@
+#[macro_use]
 extern crate state_controller;
+extern crate image;
 
 use glium::{glutin, Frame, Surface};
 use state_controller::{
-    primitive_shape::{Circle, Rectangle},
+    primitive_shape::{Circle, Rectangle, Texture},
     Event, EventHandler, Key, Receiver, Renderable, ShapeContainer, Shifter, State, Updatable,
     World,
 };
@@ -10,12 +12,14 @@ use state_controller::{
 struct InitState {
     counter: u64,
     rectangle_container: ShapeContainer<Rectangle>,
+    texture_container: ShapeContainer<Texture>,
 }
 
 impl Renderable for InitState {
     fn render(&self, frame: &mut Frame) {
         frame.clear_color(0.1, 0.1, 0.1, 1.0);
         self.rectangle_container.render(frame, &Default::default());
+        self.texture_container.render(frame, &Default::default());
         frame.set_finish().unwrap();
     }
 }
@@ -138,16 +142,27 @@ fn main() {
 
     let mut rectangle_container = ShapeContainer::<Rectangle>::new(&display);
     rectangle_container.push(Rectangle {
-        pos: [0.0, 0.0],
+        pos: [-0.3, 0.0],
         width: 0.2,
         height: 0.5,
         color: [0.1, 0.2, 0.1],
         angle: std::f32::consts::PI / 3.0,
     });
 
+    let mut texture_container = ShapeContainer::<Texture>::new(&display);
+
+    texture_container.push(Texture {
+        pos: [0.3, 0.0],
+        width: 0.4,
+        height: 0.4,
+        angle: std::f32::consts::PI / 3.0,
+        tex: texture!(&display, "../static/PNG.png", image::PNG),
+    });
+
     let init_state: InitState = InitState {
         counter: 0,
         rectangle_container,
+        texture_container,
     };
 
     let mut circle_container = ShapeContainer::<Circle>::new(&display);

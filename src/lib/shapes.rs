@@ -7,10 +7,12 @@ use std::{
 
 mod circle;
 mod rectangle;
+mod texture;
 
 pub mod primitive_shape {
     pub use super::circle::Circle;
     pub use super::rectangle::Rectangle;
+    pub use super::texture::Texture;
 }
 
 pub trait Shape {
