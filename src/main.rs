@@ -40,24 +40,24 @@ impl EventHandler for InitState {
             std::process::exit(0)
         }
         for rectangle in self.rectangle_container.iter_mut() {
-            if event.key(Key::D).is_pressed() {
-                rectangle.pos[0] += 0.03;
-                println!("Right is pressed!");
+            let dr = 0.03;
+            if event.key(Key::Right).is_pressed() {
+                rectangle.pos[0] += dr;
             }
-            if event.key(Key::A).is_pressed() {
-                rectangle.pos[0] -= 0.03;
+            if event.key(Key::Left).is_pressed() {
+                rectangle.pos[0] -= dr;
             }
-            if event.key(Key::W).is_pressed() {
-                rectangle.pos[1] += 0.03;
+            if event.key(Key::Up).is_pressed() {
+                rectangle.pos[1] += dr;
             }
-            if event.key(Key::S).is_pressed() {
-                rectangle.pos[1] -= 0.03;
+            if event.key(Key::Down).is_pressed() {
+                rectangle.pos[1] -= dr;
             }
             if event.key(Key::L).is_pressed() {
-                rectangle.angle -= 0.03;
+                rectangle.angle -= dr;
             }
             if event.key(Key::H).is_pressed() {
-                rectangle.angle += 0.03;
+                rectangle.angle += dr;
             }
             if event.key(Key::K).is_pressed() {
                 self.counter = 10000;
@@ -97,18 +97,18 @@ impl EventHandler for SecondState {
             std::process::exit(0)
         }
         for circle in self.circle_container.iter_mut() {
-            if event.key(Key::D).is_pressed() {
-                circle.pos[0] += 0.03;
-                println!("Right is pressed!");
+            let dr = 0.03;
+            if event.key(Key::Right).is_pressed() {
+                circle.pos[0] += dr;
             }
-            if event.key(Key::A).is_pressed() {
-                circle.pos[0] -= 0.03;
+            if event.key(Key::Left).is_pressed() {
+                circle.pos[0] -= dr;
             }
-            if event.key(Key::W).is_pressed() {
-                circle.pos[1] += 0.03;
+            if event.key(Key::Up).is_pressed() {
+                circle.pos[1] += dr;
             }
-            if event.key(Key::S).is_pressed() {
-                circle.pos[1] -= 0.03;
+            if event.key(Key::Down).is_pressed() {
+                circle.pos[1] -= dr;
             }
             if event.key(Key::J).is_pressed() {
                 self.counter = 10000;

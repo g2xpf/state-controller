@@ -53,6 +53,9 @@ impl Event {
                 glutin::WindowEvent::ReceivedCharacter(c) => {
                     self.key.register_text(*c);
                 }
+                glutin::WindowEvent::KeyboardInput { input, .. } => {
+                    self.key.register_key(input);
+                }
 
                 // cursor events
                 glutin::WindowEvent::CursorEntered { .. } => {
@@ -72,11 +75,6 @@ impl Event {
                 _ => (),
             },
             glutin::Event::DeviceEvent { event, .. } => match event {
-                // key events
-                glutin::DeviceEvent::Key(keyboard_input) => {
-                    self.key.register_key(keyboard_input);
-                }
-
                 // motion events
                 glutin::DeviceEvent::MouseMotion { delta } => {
                     self.motion.register_motion(delta);
