@@ -1,6 +1,6 @@
 use crate::{
-    controller_mode::{Pending, Running},
     event_controller::EventController,
+    shifter_mode::{Pending, Running},
     state::State,
     state_controller::StateController,
 };

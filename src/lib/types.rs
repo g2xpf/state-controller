@@ -1,4 +1,4 @@
-use crate::{controller_mode::Running, state_shifter::StateShifter};
+use crate::{shifter_mode::Running, state_shifter::StateShifter};
 
 pub mod key;
 pub mod state_entry;

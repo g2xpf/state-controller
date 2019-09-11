@@ -1,6 +1,6 @@
 use crate::{
-    controller_mode::{Pending, Running},
     receiver::Receiver,
+    shifter_mode::{Pending, Running},
     state::State,
     types::{state_entry::StateEntry, StateID},
 };
@@ -9,7 +9,7 @@ use std::{any::TypeId, collections::HashMap, marker::PhantomData};
 pub struct StateShifter<M> {
     states: HashMap<StateID, Box<dyn State>>,
     next_state: Option<StateEntry>,
-    controller_mode: PhantomData<M>,
+    shifter_mode: PhantomData<M>,
 }
 
 impl<M> StateShifter<M> {
@@ -43,7 +43,7 @@ impl StateShifter<Pending> {
         StateShifter {
             states: HashMap::new(),
             next_state: None,
-            controller_mode: PhantomData,
+            shifter_mode: PhantomData,
         }
     }
 
@@ -58,7 +58,7 @@ impl StateShifter<Pending> {
         StateShifter {
             states: self.states,
             next_state: None,
-            controller_mode: PhantomData,
+            shifter_mode: PhantomData,
         }
     }
 }

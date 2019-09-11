@@ -1,9 +1,9 @@
 #[macro_use]
 extern crate glium;
 
-mod controller_mode;
 mod event;
 mod event_controller;
+mod shifter_mode;
 #[macro_use]
 pub mod macros;
 mod receiver;
