@@ -1,0 +1,3 @@
+[submodule "glium_text"]
+	path = glium_text
+	url = git@github.com:g2xpf/glium_text.git

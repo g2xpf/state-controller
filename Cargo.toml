@@ -14,5 +14,6 @@ path = "src/lib/lib.rs"
 
 [dependencies]
 glium = "0.25.1"
+glium_text = { path = "./glium_text", version = "0.14.0"}
 cgmath = "0.17.0"
 image = "0.21.0"
