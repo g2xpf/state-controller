@@ -41,25 +41,27 @@ impl StateController<Pending> {
 
 impl StateController<Running> {
     pub(crate) fn handle_events(&mut self, event: &Event) {
-        self.current_state.handle(&event);
+        self.current_state.borrow_mut().handle(&event);
     }
 
     pub fn initialize(&mut self) {
-        self.current_state.initialize();
+        self.current_state.borrow_mut().initialize();
     }
 
     pub fn update(&mut self) {
-        self.current_state.update(&mut self.state_shifter);
+        self.current_state
+            .borrow_mut()
+            .update(&mut self.state_shifter);
 
         if let Some(mut next_state_entry) = self.state_shifter.try_update() {
-            self.current_state.finalize();
-            next_state_entry.initialize();
+            self.current_state.borrow_mut().finalize();
+            next_state_entry.borrow_mut().initialize();
             mem::swap(&mut self.current_state, &mut next_state_entry);
             self.state_shifter.insert_current_state(next_state_entry);
         }
     }
 
     pub fn render(&mut self, frame: &mut Frame) {
-        self.current_state.render(frame);
+        self.current_state.borrow_mut().render(frame);
     }
 }

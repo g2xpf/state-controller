@@ -47,13 +47,13 @@ pub trait State: Updatable + Renderable + EventHandler + Any + 'static {
         }
 
         // fetch next state
-        let mut next_state = shifter
+        let next_state = shifter
             .remove::<S>()
             .unwrap_or_else(|| panic!("Tried to make a transition to the unregistered state"));
 
         // send M from Self to S
         next_state
-            .as_mut()
+            .borrow_mut()
             .downcast_mut::<S>()
             .unwrap()
             .receive(message);

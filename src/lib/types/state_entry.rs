@@ -1,19 +1,26 @@
-use crate::{state::State, types::StateID};
-use std::ops::{Deref, DerefMut};
+use crate::{
+    state::State,
+    types::{SharedState, StateID},
+};
+use std::{
+    cell::RefCell,
+    ops::{Deref, DerefMut},
+    rc::Rc,
+};
 
-pub(crate) struct StateEntry(pub(crate) StateID, pub(crate) Box<dyn State>);
+pub(crate) struct StateEntry(pub(crate) StateID, pub(crate) SharedState);
 
 impl StateEntry {
     pub fn new<S>(state: S) -> Self
     where
         S: State + 'static,
     {
-        StateEntry(StateID::of::<S>(), Box::new(state))
+        StateEntry(StateID::of::<S>(), Rc::new(RefCell::new(state)))
     }
 }
 
 impl Deref for StateEntry {
-    type Target = Box<dyn State>;
+    type Target = SharedState;
     fn deref(&self) -> &Self::Target {
         &self.1
     }

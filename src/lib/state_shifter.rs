@@ -1,19 +1,19 @@
 use crate::{
-    receiver::Receiver,
     shifter_mode::{Pending, Running},
     state::State,
-    types::{state_entry::StateEntry, StateID},
+    types::{state_entry::StateEntry, SharedState, StateID},
 };
-use std::{any::TypeId, collections::HashMap, marker::PhantomData};
+
+use std::{any::TypeId, cell::RefCell, collections::HashMap, marker::PhantomData, rc::Rc};
 
 pub struct StateShifter<M> {
-    states: HashMap<StateID, Box<dyn State>>,
+    states: HashMap<StateID, SharedState>,
     pub(crate) next_state: Option<StateEntry>,
     shifter_mode: PhantomData<M>,
 }
 
 impl<M> StateShifter<M> {
-    pub(crate) fn remove<S>(&mut self) -> Option<Box<dyn State>>
+    pub(crate) fn remove<S>(&mut self) -> Option<SharedState>
     where
         S: State + 'static,
     {
@@ -21,7 +21,7 @@ impl<M> StateShifter<M> {
         self.states.remove(&state_id)
     }
 
-    fn insert<S>(&mut self, state: Box<dyn State>)
+    fn insert<S>(&mut self, state: SharedState)
     where
         S: State + 'static,
     {
@@ -51,7 +51,7 @@ impl StateShifter<Pending> {
     where
         S: State + 'static,
     {
-        self.insert::<S>(Box::new(state) as Box<dyn State>);
+        self.insert::<S>(Rc::new(RefCell::new(state)) as Rc<RefCell<dyn State>>);
     }
 
     pub fn run(self) -> StateShifter<Running> {
@@ -67,33 +67,5 @@ impl StateShifter<Running> {
     pub(crate) fn try_update(&mut self) -> Option<StateEntry> {
         let next_state = self.next_state.take()?;
         Some(next_state)
-    }
-
-    pub fn shift<S1, S2>(&mut self, message: <S2 as Receiver<S1>>::Message)
-    where
-        S1: State + 'static,
-        S2: State + 'static,
-        S2: Receiver<S1>,
-    {
-        if self.next_state.is_some() {
-            panic!("Cannot set the next state twice");
-        }
-
-        // fetch next state
-        let mut next_state = self
-            .remove::<S2>()
-            .unwrap_or_else(|| panic!("Tried to make a transition to the unregistered state"));
-
-        // send M from S1 to S2
-        next_state
-            .as_mut()
-            .downcast_mut::<S2>()
-            .unwrap()
-            .receive(message);
-
-        // set next state
-        let next_state_id = StateID::of::<S2>();
-
-        self.next_state = Some(StateEntry(next_state_id, next_state));
     }
 }
