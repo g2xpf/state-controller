@@ -2,7 +2,7 @@ use crate::{event::Event, types::Shifter};
 use glium::Frame;
 
 pub trait Updatable {
-    fn update(&mut self, _state_controller: &mut Shifter) {}
+    fn update(&mut self, _shifter: &mut Shifter) {}
 }
 
 pub trait Renderable {
