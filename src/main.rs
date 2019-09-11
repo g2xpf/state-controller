@@ -28,7 +28,7 @@ impl Updatable for InitState {
     fn update(&mut self, shifter: &mut Shifter) {
         if self.counter >= 1000 {
             self.counter = 0;
-            shifter.shift::<Self, SecondState>(());
+            self.shift_with::<SecondState>(shifter, ());
         }
         self.counter += 1;
     }
@@ -85,7 +85,7 @@ impl Updatable for SecondState {
     fn update(&mut self, shifter: &mut Shifter) {
         if self.counter >= 1000 {
             self.counter = 0;
-            shifter.shift::<Self, InitState>(());
+            self.shift::<InitState>(shifter);
         }
         self.counter += 1;
     }

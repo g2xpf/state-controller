@@ -8,12 +8,12 @@ use std::{any::TypeId, collections::HashMap, marker::PhantomData};
 
 pub struct StateShifter<M> {
     states: HashMap<StateID, Box<dyn State>>,
-    next_state: Option<StateEntry>,
+    pub(crate) next_state: Option<StateEntry>,
     shifter_mode: PhantomData<M>,
 }
 
 impl<M> StateShifter<M> {
-    fn remove<S>(&mut self) -> Option<Box<dyn State>>
+    pub(crate) fn remove<S>(&mut self) -> Option<Box<dyn State>>
     where
         S: State + 'static,
     {
