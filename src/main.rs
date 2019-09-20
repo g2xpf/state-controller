@@ -177,8 +177,9 @@ fn main() {
         circle_container,
     };
 
-    let mut world = World::new(events_loop, display, init_state);
-    world.register(second_state);
-    let mut world = world.finalize();
+    let mut world = World::new(events_loop, display, init_state)
+        .register(second_state)
+        .finalize();
+
     world.run();
 }

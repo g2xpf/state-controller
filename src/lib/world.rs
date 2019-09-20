@@ -24,11 +24,12 @@ impl World<Pending> {
         }
     }
 
-    pub fn register<S>(&mut self, state: S)
+    pub fn register<S>(mut self, state: S) -> Self
     where
         S: State + 'static,
     {
         self.state_controller.register(state);
+        self
     }
 
     pub fn finalize(self) -> World<Running> {
