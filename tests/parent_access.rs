@@ -1,0 +1,66 @@
+// state family: InitState -> SecondState
+use glium::{Frame, Surface};
+use state_controller::{EventHandler, HasParent, Renderable, Shifter, State, Updatable, World};
+
+#[derive(Default)]
+struct InitState {
+    counter: i32,
+}
+
+impl Renderable for InitState {
+    fn render(&self, frame: &mut Frame) {
+        frame.clear_color(1.0, 0.0, 0.0, 1.0);
+        frame.set_finish().unwrap();
+    }
+}
+
+impl Updatable for InitState {
+    fn update(&mut self, shifter: &mut Shifter) {
+        let mut parent = self.parent_mut(shifter);
+        assert_eq!(self.counter, parent.counter);
+
+        parent.counter += 1;
+        self.counter += 1;
+
+        if self.counter >= 10 {
+            std::process::exit(0);
+        }
+    }
+}
+
+impl EventHandler for InitState {}
+impl State for InitState {}
+
+#[derive(Default)]
+struct SecondState {
+    counter: i32,
+}
+
+impl Renderable for SecondState {}
+impl Updatable for SecondState {}
+impl EventHandler for SecondState {}
+impl State for SecondState {}
+
+impl HasParent<SecondState> for InitState {}
+
+#[test]
+fn parent_access() {
+    std::thread::sleep(std::time::Duration::from_millis(1000));
+
+    use glium::glutin;
+    let events_loop = glutin::EventsLoop::new();
+    let window_size = glutin::dpi::LogicalSize::new(640f64, 640f64);
+    let window = glutin::WindowBuilder::new()
+        .with_dimensions(window_size)
+        .with_title("Main");
+    let ctx = glutin::ContextBuilder::new().with_vsync(true);
+    let display = glium::Display::new(window, ctx, &events_loop).unwrap();
+
+    let init_state: InitState = Default::default();
+    let second_state: SecondState = Default::default();
+    let mut world = World::new(events_loop, display, init_state)
+        .register(second_state)
+        .finalize();
+
+    world.run();
+}

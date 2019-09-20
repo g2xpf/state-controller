@@ -7,7 +7,7 @@ use crate::{
 use std::{any::TypeId, cell::RefCell, collections::HashMap, marker::PhantomData, rc::Rc};
 
 pub struct StateShifter<M> {
-    states: HashMap<StateID, SharedState>,
+    pub(crate) states: HashMap<StateID, SharedState>,
     pub(crate) next_state: Option<StateEntry>,
     shifter_mode: PhantomData<M>,
 }
@@ -32,6 +32,14 @@ impl<M> StateShifter<M> {
     pub(crate) fn insert_current_state(&mut self, state_entry: StateEntry) {
         let StateEntry(state_id, state) = state_entry;
         self.states.insert(state_id, state);
+    }
+
+    pub(crate) fn get<S>(&self) -> Option<&SharedState>
+    where
+        S: State + 'static,
+    {
+        let state_id = TypeId::of::<S>();
+        self.states.get(&state_id)
     }
 }
 
