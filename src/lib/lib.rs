@@ -6,7 +6,7 @@ mod event_controller;
 mod shifter_mode;
 #[macro_use]
 pub mod macros;
-mod has_parent;
+mod parent;
 mod receiver;
 mod renderer;
 mod shapes;
@@ -19,7 +19,7 @@ pub mod utils;
 mod world;
 
 pub use event::Event;
-pub use has_parent::HasParent;
+pub use parent::Parent;
 pub use receiver::Receiver;
 pub use renderer::RenderContext;
 pub use shapes::{primitive_shape, Shape, ShapeContainer};

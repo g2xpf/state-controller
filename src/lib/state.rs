@@ -1,11 +1,13 @@
 use crate::{
+    parent::Parent,
     receiver::Receiver,
-    shifter_mode::Running,
-    state_shifter::StateShifter,
     traits::{EventHandler, Renderable, Updatable},
-    types::{state_entry::StateEntry, StateID},
+    types::{state_entry::StateEntry, Shifter, StateID, StateRef, StateRefMut},
 };
-use std::any::Any;
+use std::{
+    any::Any,
+    cell::{Ref, RefMut},
+};
 
 pub trait State: Updatable + Renderable + EventHandler + Any + 'static {
     // run when transitioning to this state
@@ -14,7 +16,7 @@ pub trait State: Updatable + Renderable + EventHandler + Any + 'static {
     // run when transitioning to this state
     fn finalize(&mut self) {}
 
-    fn shift<S>(&self, shifter: &mut StateShifter<Running>)
+    fn shift<S>(&self, shifter: &mut Shifter)
     where
         Self: Sized,
         S: State + 'static,
@@ -36,7 +38,7 @@ pub trait State: Updatable + Renderable + EventHandler + Any + 'static {
     }
 
     // shift to the other state
-    fn shift_with<S>(&self, shifter: &mut StateShifter<Running>, message: S::Message)
+    fn shift_with<S>(&self, shifter: &mut Shifter, message: S::Message)
     where
         Self: Sized,
         S: State + 'static,
@@ -62,6 +64,30 @@ pub trait State: Updatable + Renderable + EventHandler + Any + 'static {
         let next_state_id = StateID::of::<S>();
 
         shifter.next_state = Some(StateEntry(next_state_id, next_state));
+    }
+
+    fn parent_ref<'a, P>(&self, shifter: &'a Shifter) -> StateRef<'a, P>
+    where
+        Self: Sized,
+        P: Parent<Self>,
+    {
+        let parent = shifter
+            .get::<P>()
+            .unwrap_or_else(|| panic!("Tried to call the unregistered parent"))
+            .borrow();
+        Ref::map(parent, |s| s.downcast_ref::<P>().unwrap())
+    }
+
+    fn parent_mut<'a, P>(&self, shifter: &'a mut Shifter) -> StateRefMut<'a, P>
+    where
+        Self: Sized,
+        P: Parent<Self>,
+    {
+        let parent = shifter
+            .get::<P>()
+            .unwrap_or_else(|| panic!("Tried to call the unregistered parent"))
+            .borrow_mut();
+        RefMut::map(parent, |s| s.downcast_mut::<P>().unwrap())
     }
 }
 

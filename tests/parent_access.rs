@@ -1,6 +1,6 @@
 // state family: InitState -> SecondState
 use glium::{Frame, Surface};
-use state_controller::{EventHandler, HasParent, Renderable, Shifter, State, Updatable, World};
+use state_controller::{EventHandler, Parent, Renderable, Shifter, State, Updatable, World};
 
 #[derive(Default)]
 struct InitState {
@@ -16,7 +16,7 @@ impl Renderable for InitState {
 
 impl Updatable for InitState {
     fn update(&mut self, shifter: &mut Shifter) {
-        let mut parent = self.parent_mut(shifter);
+        let mut parent = self.parent_mut::<SecondState>(shifter);
         assert_eq!(self.counter, parent.counter);
 
         parent.counter += 1;
@@ -41,7 +41,7 @@ impl Updatable for SecondState {}
 impl EventHandler for SecondState {}
 impl State for SecondState {}
 
-impl HasParent<SecondState> for InitState {}
+impl Parent<InitState> for SecondState {}
 
 #[test]
 fn parent_access() {
