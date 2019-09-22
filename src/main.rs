@@ -5,8 +5,9 @@ extern crate image;
 use glium::{glutin, Frame, Surface};
 use state_controller::{
     primitive_shape::{Circle, Rectangle, Texture},
-    Event, EventHandler, Key, Receiver, Renderable, ShapeContainer, Shifter, State, Updatable,
-    World,
+    utils::{Timer, TimerState},
+    Event, EventHandler, IntermediateState, Key, Receiver, Renderable, ShapeContainer, Shifter,
+    State, Transition, TransitionFlow, Transitionable, Updatable, World,
 };
 
 struct InitState {
@@ -131,6 +132,50 @@ impl Receiver<InitState> for SecondState {
     fn receive(&mut self, _message: Self::Message) {}
 }
 
+struct InitToSecond {
+    timer: Timer,
+    transition: Transition<InitState, SecondState>,
+}
+
+impl IntermediateState for InitToSecond {
+    fn transition_location(&mut self) -> &mut dyn Transitionable {
+        &mut self.transition
+    }
+
+    fn initialize(&mut self) {
+        self.timer.start();
+    }
+
+    fn finalize(&mut self) {
+        self.timer.stop();
+    }
+
+    fn update(&mut self) -> TransitionFlow {
+        if let TimerState::Full = self.timer.get_state() {
+            TransitionFlow::Break
+        } else {
+            TransitionFlow::Continue
+        }
+    }
+
+    fn render(&self, frame: &mut Frame) {
+        let (from, to) = self.transition.borrow();
+        match self.timer.get_state() {
+            TimerState::Counting(ratio) if ratio < 0.5 => {
+                from.rectangle_container.render(frame, &Default::default());
+                from.texture_container.render(frame, &Default::default());
+                frame.clear_color(0.0, 0.0, 0.0, ratio as f32 * 2.0);
+            }
+            TimerState::Counting(ratio) => {
+                to.circle_container.render(frame, &Default::default());
+                frame.clear_color(0.0, 0.0, 0.0, (1.0 - ratio as f32) * 2.0);
+            }
+            _ => {}
+        }
+        frame.set_finish().unwrap()
+    }
+}
+
 fn main() {
     let events_loop = glutin::EventsLoop::new();
     let window_size = glutin::dpi::LogicalSize::new(640f64, 640f64);
@@ -177,8 +222,14 @@ fn main() {
         circle_container,
     };
 
+    let init_to_second = InitToSecond {
+        timer: Timer::from_millis(500),
+        transition: Transition::new(),
+    };
+
     let mut world = World::new(events_loop, display, init_state)
         .register_state(second_state)
+        .register_transition::<InitState, SecondState, _>(init_to_second)
         .finalize();
 
     world.run();
