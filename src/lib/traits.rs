@@ -20,7 +20,7 @@ pub trait EventHandler {
 }
 
 pub struct TransitionEvidence;
-pub trait Transitionable: Any + 'static {
+pub trait Transitionable: Any {
     fn evidence(&self) -> TransitionEvidence;
 }
 
