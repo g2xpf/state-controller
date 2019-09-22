@@ -110,9 +110,11 @@ impl StateController<Running> {
         if let Some(IntermediateStateEntry(_, ref intermediate_state)) =
             self.current_intermediate_state
         {
-            intermediate_state.render(frame);
+            intermediate_state.render(&self.state_shifter, frame);
         } else {
-            self.current_state.borrow_mut().render(frame);
+            self.current_state
+                .borrow_mut()
+                .render(&self.state_shifter, frame);
         }
     }
 }

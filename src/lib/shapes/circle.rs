@@ -22,18 +22,18 @@ impl Shape for Circle {
     type Vertex = Vertex;
 
     fn vertex() -> Vec<Self::Vertex> {
-        let mut v = vec![Vertex { coord: [0.0, 0.0] }];
-        for i in 0..NSEP {
-            let theta = (i as f32) / (NSEP as f32) * 2.0 * std::f32::consts::PI;
-            v.push(Vertex {
-                coord: [0.5 * theta.cos(), 0.5 * theta.sin()],
-            });
-        }
-        v
+        vec![
+            Vertex {
+                coord: [-1.0, -1.0],
+            },
+            Vertex { coord: [1.0, -1.0] },
+            Vertex { coord: [1.0, 1.0] },
+            Vertex { coord: [-1.0, 1.0] },
+        ]
     }
 
     fn index() -> Vec<u32> {
-        (0u32..NSEP).chain(Some(1).into_iter()).collect()
+        (0..4).collect()
     }
 
     fn render_mode() -> PrimitiveType {
@@ -49,4 +49,4 @@ impl Shape for Circle {
     }
 }
 
-impl_shape_container!(Circle; pos, r, color; camera_pos: (f32, f32));
+impl_shape_container!(Circle; pos, r, color; camera_pos: (f32, f32), iResolution: (i32, i32));

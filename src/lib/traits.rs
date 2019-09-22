@@ -7,7 +7,7 @@ pub trait Updatable {
 }
 
 pub trait Renderable {
-    fn render(&self, _frame: &mut Frame) {}
+    fn render(&self, _shifter: &Shifter, _frame: &mut Frame) {}
 }
 
 pub trait EventHandler {

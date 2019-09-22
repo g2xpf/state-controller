@@ -1,4 +1,8 @@
-use crate::{event::Event, traits::Transitionable, types::TransitionFlow};
+use crate::{
+    event::Event,
+    traits::Transitionable,
+    types::{Shifter, TransitionFlow},
+};
 
 use glium::Frame;
 // this trait is for constructing trait objects of IntermediateState without specifying associated types
@@ -10,7 +14,7 @@ pub trait IntermediateState: 'static {
     fn update(&mut self) -> TransitionFlow {
         TransitionFlow::Break
     }
-    fn render(&self, _frame: &mut Frame) {}
+    fn render(&self, _shifter: &Shifter, _frame: &mut Frame) {}
     fn handle(&mut self, _event: &Event) -> TransitionFlow {
         TransitionFlow::Break
     }

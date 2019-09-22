@@ -6,9 +6,19 @@ use glium::{glutin, Frame};
 use state_controller::{
     primitive_shape::{Circle, Rectangle, Texture},
     utils::{EaseInOutSin, EaseOutBounce, Timer},
-    Event, EventHandler, IntermediateState, Key, Receiver, Renderable, ShapeContainer, Shifter,
-    State, Transition, TransitionFlow, Transitionable, Updatable, World,
+    Event, EventHandler, IntermediateState, Key, Parent, Receiver, Renderable, ShapeContainer,
+    Shifter, State, Transition, TransitionFlow, Transitionable, Updatable, World,
 };
+
+struct Global {
+    resolution: (i32, i32),
+    timer: Timer,
+}
+
+impl Renderable for Global {}
+impl Updatable for Global {}
+impl EventHandler for Global {}
+impl State for Global {}
 
 struct InitState {
     counter: u64,
@@ -17,7 +27,7 @@ struct InitState {
 }
 
 impl Renderable for InitState {
-    fn render(&self, frame: &mut Frame) {
+    fn render(&self, _shifter: &Shifter, frame: &mut Frame) {
         self.rectangle_container
             .render(frame, &Default::default(), (0., 0.));
         self.texture_container
@@ -29,7 +39,7 @@ impl Updatable for InitState {
     fn update(&mut self, shifter: &mut Shifter) {
         if self.counter >= 1000 {
             self.counter = 0;
-            self.shift_with::<SecondState>(shifter, ());
+            self.shift::<SecondState>(shifter);
         }
         self.counter += 1;
     }
@@ -75,9 +85,10 @@ struct SecondState {
 }
 
 impl Renderable for SecondState {
-    fn render(&self, frame: &mut Frame) {
+    fn render(&self, shifter: &Shifter, frame: &mut Frame) {
+        let parent = self.parent_ref::<Global>(shifter);
         self.circle_container
-            .render(frame, &Default::default(), (0., 0.));
+            .render(frame, &Default::default(), (0., 0.), parent.resolution);
     }
 }
 
@@ -156,8 +167,9 @@ impl IntermediateState for InitToSecond {
         }
     }
 
-    fn render(&self, frame: &mut Frame) {
+    fn render(&self, shifter: &Shifter, frame: &mut Frame) {
         let (from, to) = self.transition.borrow();
+        let parent = from.parent_ref::<Global>(shifter);
         match self.timer.get_ratio_easing::<EaseInOutSin>() {
             Some(ratio) => {
                 let ratio = ratio as f32;
@@ -165,8 +177,12 @@ impl IntermediateState for InitToSecond {
                     .render(frame, &Default::default(), (ratio * 2., 0.));
                 from.texture_container
                     .render(frame, &Default::default(), (ratio * 2., 0.));
-                to.circle_container
-                    .render(frame, &Default::default(), (ratio * 2. - 2.0, 0.));
+                to.circle_container.render(
+                    frame,
+                    &Default::default(),
+                    (ratio * 2. - 2.0, 0.),
+                    parent.resolution,
+                );
             }
             _ => {}
         }
@@ -198,8 +214,9 @@ impl IntermediateState for SecondToInit {
         }
     }
 
-    fn render(&self, frame: &mut Frame) {
+    fn render(&self, shifter: &Shifter, frame: &mut Frame) {
         let (from, to) = self.transition.borrow();
+        let parent = from.parent_ref::<Global>(shifter);
         match self.timer.get_ratio_easing::<EaseOutBounce>() {
             Some(ratio) => {
                 let ratio = ratio as f32;
@@ -211,12 +228,15 @@ impl IntermediateState for SecondToInit {
                     frame,
                     &Default::default(),
                     ((1. - ratio) * 2. - 2.0, 0.),
+                    parent.resolution,
                 );
             }
             _ => {}
         }
     }
 }
+
+impl<T> Parent<T> for Global where T: State {}
 
 fn main() {
     let events_loop = glutin::EventsLoop::new();
@@ -255,13 +275,21 @@ fn main() {
     let mut circle_container = ShapeContainer::<Circle>::new(&display);
     circle_container.push(Circle {
         pos: [0.0, 0.0],
-        r: 1.3,
+        r: 0.5,
         color: [0.0, 0.4, 0.4],
     });
 
     let second_state: SecondState = SecondState {
         counter: 0,
         circle_container,
+    };
+
+    let global = Global {
+        timer: Timer::from_millis(std::u64::MAX),
+        resolution: {
+            let (w, h) = display.get_framebuffer_dimensions();
+            (w as i32, h as i32)
+        },
     };
 
     let init_to_second = InitToSecond {
@@ -276,6 +304,7 @@ fn main() {
 
     let mut world = World::new(events_loop, display, init_state)
         .register_state(second_state)
+        .register_state(global)
         .register_transition::<InitState, SecondState, _>(init_to_second)
         .register_transition::<SecondState, InitState, _>(second_to_init)
         .finalize();
