@@ -3,7 +3,6 @@ use crate::{
     shifter_mode::{Pending, Running},
     state::State,
     state_transition::Transition,
-    traits::Transitionable,
     types::{
         state_entry::{IntermediateStateEntry, StateEntry},
         IntermediateStateID, SharedState, StateID,
@@ -20,14 +19,6 @@ pub struct StateShifter<M> {
 }
 
 impl<M> StateShifter<M> {
-    pub(crate) fn remove<S>(&mut self) -> Option<SharedState>
-    where
-        S: State + 'static,
-    {
-        let state_id = TypeId::of::<S>();
-        self.states.remove(&state_id)
-    }
-
     fn insert<S>(&mut self, state: SharedState)
     where
         S: State + 'static,
@@ -44,7 +35,6 @@ impl<M> StateShifter<M> {
     {
         let from = self.get::<F>();
         let to = self.get::<T>();
-        println!("{:?}, {:?}", from.is_some(), to.is_some());
         if let (Some(from), Some(to)) = (from, to) {
             let transition_location = intermediate_state.transition_location();
             let transition_location = transition_location

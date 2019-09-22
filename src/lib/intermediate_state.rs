@@ -5,7 +5,13 @@ use glium::Frame;
 
 pub trait IntermediateState: 'static {
     fn transition_location(&mut self) -> &mut dyn Transitionable;
-    fn update(&mut self) -> TransitionFlow;
-    fn render(&self, frame: &mut Frame);
-    fn handle(&mut self, event: &Event) -> TransitionFlow;
+    fn initialize(&mut self) {}
+    fn finalize(&mut self) {}
+    fn update(&mut self) -> TransitionFlow {
+        TransitionFlow::Break
+    }
+    fn render(&self, _frame: &mut Frame) {}
+    fn handle(&mut self, _event: &Event) -> TransitionFlow {
+        TransitionFlow::Break
+    }
 }

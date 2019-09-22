@@ -1,7 +1,8 @@
 use glium::{Frame, Surface};
 use state_controller::{
-    utils::Timer, Event, EventHandler, IntermediateState, Receiver, Renderable, Shifter, State,
-    Transition, TransitionFlow, Transitionable, Updatable, World,
+    utils::{EaseInOutSin, Timer, TimerState},
+    Event, EventHandler, IntermediateState, Receiver, Renderable, Shifter, State, Transition,
+    TransitionFlow, Transitionable, Updatable, World,
 };
 
 #[derive(Default)]
@@ -85,11 +86,29 @@ impl IntermediateState for InitToSecond {
         &mut self.transition as &mut dyn Transitionable
     }
 
-    fn update(&mut self) -> TransitionFlow {
-        TransitionFlow::Break
+    fn initialize(&mut self) {
+        self.timer.start();
     }
 
-    fn render(&self, _frame: &mut Frame) {}
+    fn finalize(&mut self) {
+        self.timer.stop();
+    }
+
+    fn update(&mut self) -> TransitionFlow {
+        if self.timer.get_ratio() == TimerState::Full {
+            TransitionFlow::Break
+        } else {
+            TransitionFlow::Continue
+        }
+    }
+
+    fn render(&self, frame: &mut Frame) {
+        if let TimerState::Counting(ratio) = self.timer.get_ratio_easing::<EaseInOutSin>() {
+            let ratio = ratio as f32;
+            frame.clear_color(ratio, ratio, ratio, 1.0);
+            frame.set_finish().unwrap();
+        }
+    }
 
     fn handle(&mut self, _event: &Event) -> TransitionFlow {
         TransitionFlow::Break

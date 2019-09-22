@@ -64,9 +64,9 @@ impl StateController<Running> {
             self.current_intermediate_state
         {
             intermediate_state.handle(event);
+        } else {
+            self.current_state.borrow_mut().handle(&event);
         }
-
-        self.current_state.borrow_mut().handle(&event);
     }
 
     pub fn initialize(&mut self) {
@@ -74,14 +74,18 @@ impl StateController<Running> {
     }
 
     pub fn update(&mut self) {
-        self.current_intermediate_state = self.state_shifter.next_intermediate_state.take();
+        if let Some(mut intermediate_state) = self.state_shifter.next_intermediate_state.take() {
+            intermediate_state.initialize();
+            self.current_intermediate_state = Some(intermediate_state);
+        }
 
         if let Some(IntermediateStateEntry(_, ref mut intermediate_state)) =
             self.current_intermediate_state
         {
             match intermediate_state.update() {
                 TransitionFlow::Break => {
-                    let intermediate_state = self.current_intermediate_state.take().unwrap();
+                    let mut intermediate_state = self.current_intermediate_state.take().unwrap();
+                    intermediate_state.finalize();
                     self.state_shifter
                         .insert_intermediate_state_entry(intermediate_state);
                 }
@@ -108,8 +112,8 @@ impl StateController<Running> {
             self.current_intermediate_state
         {
             intermediate_state.render(frame);
+        } else {
+            self.current_state.borrow_mut().render(frame);
         }
-
-        self.current_state.borrow_mut().render(frame);
     }
 }
