@@ -1,5 +1,6 @@
 use crate::{
     event_controller::EventController,
+    intermediate_state::IntermediateState,
     shifter_mode::{Pending, Running},
     state::State,
     state_controller::StateController,
@@ -24,12 +25,38 @@ impl World<Pending> {
         }
     }
 
-    pub fn register<S>(mut self, state: S) -> Self
+    pub fn register_state<S>(mut self, state: S) -> Self
     where
         S: State + 'static,
     {
-        self.state_controller.register(state);
+        self.state_controller.register_state(state);
         self
+    }
+
+    pub fn try_register_transition<F, T, I>(mut self, intermediate_state: I) -> Option<Self>
+    where
+        F: State,
+        T: State,
+        I: IntermediateState,
+    {
+        if self
+            .state_controller
+            .try_register_transition::<F, T, I>(intermediate_state)
+        {
+            Some(self)
+        } else {
+            None
+        }
+    }
+
+    pub fn register_transition<F, T, I>(self, intermediate_state: I) -> Self
+    where
+        F: State,
+        T: State,
+        I: IntermediateState,
+    {
+        self.try_register_transition::<F, T, I>(intermediate_state)
+            .unwrap()
     }
 
     pub fn finalize(self) -> World<Running> {

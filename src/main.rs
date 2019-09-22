@@ -178,7 +178,7 @@ fn main() {
     };
 
     let mut world = World::new(events_loop, display, init_state)
-        .register(second_state)
+        .register_state(second_state)
         .finalize();
 
     world.run();

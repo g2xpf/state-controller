@@ -2,7 +2,10 @@ use crate::{
     parent::Parent,
     receiver::Receiver,
     traits::{EventHandler, Renderable, Updatable},
-    types::{state_entry::StateEntry, Shifter, StateID, StateRef, StateRefMut},
+    types::{
+        state_entry::{IntermediateStateEntry, StateEntry},
+        Shifter, StateID, StateRef, StateRefMut,
+    },
 };
 use std::{
     any::Any,
@@ -26,13 +29,21 @@ pub trait State: Updatable + Renderable + EventHandler + Any + 'static {
             panic!("Cannot set the next state twice");
         }
 
+        // create state keys
+        let current_state_id = StateID::of::<Self>();
+        let next_state_id = StateID::of::<S>();
+        let id_pair = (current_state_id, next_state_id);
+
+        // set intermediate state from Self to S if found
+        shifter.next_intermediate_state = shifter
+            .intermediate_states
+            .remove(&id_pair)
+            .map(|s| IntermediateStateEntry(id_pair, s));
+
         // fetch next state
         let next_state = shifter
-            .remove::<S>()
+            .get_cloned::<S>()
             .unwrap_or_else(|| panic!("Tried to make a transition to the unregistered state"));
-
-        // set next state
-        let next_state_id = StateID::of::<S>();
 
         shifter.next_state = Some(StateEntry(next_state_id, next_state));
     }
@@ -48,9 +59,20 @@ pub trait State: Updatable + Renderable + EventHandler + Any + 'static {
             panic!("Cannot set the next state twice");
         }
 
+        // create state keys
+        let current_state_id = StateID::of::<Self>();
+        let next_state_id = StateID::of::<S>();
+        let id_pair = (current_state_id, next_state_id);
+
+        // set intermediate state from Self to S if found
+        shifter.next_intermediate_state = shifter
+            .intermediate_states
+            .remove(&id_pair)
+            .map(|s| IntermediateStateEntry(id_pair, s));
+
         // fetch next state
         let next_state = shifter
-            .remove::<S>()
+            .get_cloned::<S>()
             .unwrap_or_else(|| panic!("Tried to make a transition to the unregistered state"));
 
         // send M from Self to S
@@ -59,9 +81,6 @@ pub trait State: Updatable + Renderable + EventHandler + Any + 'static {
             .downcast_mut::<S>()
             .unwrap()
             .receive(message);
-
-        // set next state
-        let next_state_id = StateID::of::<S>();
 
         shifter.next_state = Some(StateEntry(next_state_id, next_state));
     }

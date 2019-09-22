@@ -88,7 +88,7 @@ fn two_states_test() {
     let init_state: InitState = Default::default();
     let second_state: SecondState = Default::default();
     let mut world = World::new(events_loop, display, init_state)
-        .register(second_state)
+        .register_state(second_state)
         .finalize();
 
     world.run();

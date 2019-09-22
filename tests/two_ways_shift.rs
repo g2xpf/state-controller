@@ -148,8 +148,8 @@ fn two_ways_shift() {
     let second_state: SecondState = Default::default();
     let third_state: ThirdState = Default::default();
     let mut world = World::new(events_loop, display, init_state)
-        .register(second_state)
-        .register(third_state)
+        .register_state(second_state)
+        .register_state(third_state)
         .finalize();
 
     world.run();
