@@ -55,7 +55,7 @@ impl Timer {
         self.start();
     }
 
-    pub fn get_ratio(&self) -> TimerState {
+    pub fn get_state(&self) -> TimerState {
         if self.timer.is_none() {
             return TimerState::Stop;
         }
@@ -68,11 +68,11 @@ impl Timer {
         TimerState::Counting(ratio)
     }
 
-    pub fn get_ratio_easing<E>(&self) -> TimerState
+    pub fn get_state_easing<E>(&self) -> TimerState
     where
         E: Easing,
     {
-        match self.get_ratio() {
+        match self.get_state() {
             TimerState::Counting(ratio) => TimerState::Counting(E::fetch(ratio)),
             e @ _ => e,
         }

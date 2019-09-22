@@ -25,7 +25,7 @@ impl Renderable for InitState {
 
 impl Updatable for InitState {
     fn update(&mut self, _shifter: &mut Shifter) {
-        if let TimerState::Counting(ratio) = self.timer.get_ratio_easing::<Linear>() {
+        if let TimerState::Counting(ratio) = self.timer.get_state_easing::<Linear>() {
             println!("progress: {}", ratio);
         } else {
             std::process::exit(0);

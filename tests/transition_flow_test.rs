@@ -26,7 +26,7 @@ impl Updatable for InitState {
     fn update(&mut self, state_shifter: &mut Shifter) {
         self.counter += 1;
         std::thread::sleep(std::time::Duration::from_millis(16));
-        if self.counter >= 10 {
+        if self.counter >= 50 {
             self.shift_with::<SecondState>(state_shifter, self.counter);
         }
     }
@@ -66,7 +66,7 @@ impl Updatable for SecondState {
     fn update(&mut self, _shifter: &mut Shifter) {
         self.counter += 1;
         std::thread::sleep(std::time::Duration::from_millis(16));
-        if self.counter >= 30 {
+        if self.counter >= 100 {
             std::process::exit(0);
         }
     }
@@ -95,7 +95,7 @@ impl IntermediateState for InitToSecond {
     }
 
     fn update(&mut self) -> TransitionFlow {
-        if self.timer.get_ratio() == TimerState::Full {
+        if self.timer.get_state() == TimerState::Full {
             TransitionFlow::Break
         } else {
             TransitionFlow::Continue
@@ -103,7 +103,7 @@ impl IntermediateState for InitToSecond {
     }
 
     fn render(&self, frame: &mut Frame) {
-        if let TimerState::Counting(ratio) = self.timer.get_ratio_easing::<EaseInOutSin>() {
+        if let TimerState::Counting(ratio) = self.timer.get_state_easing::<EaseInOutSin>() {
             let ratio = ratio as f32;
             frame.clear_color(ratio, ratio, ratio, 1.0);
             frame.set_finish().unwrap();
