@@ -7,12 +7,7 @@ pub trait Updatable {
 }
 
 pub trait Renderable {
-    fn render(&self, frame: &mut Frame) {
-        use glium::Surface;
-
-        frame.clear_color(1.0, 1.0, 1.0, 1.0);
-        frame.set_finish().unwrap();
-    }
+    fn render(&self, _frame: &mut Frame) {}
 }
 
 pub trait EventHandler {

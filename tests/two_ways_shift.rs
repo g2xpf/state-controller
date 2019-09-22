@@ -27,14 +27,11 @@ impl Receiver<ThirdState> for InitState {
 impl EventHandler for InitState {}
 
 impl Renderable for InitState {
-    fn render(&self, frame: &mut Frame) {
+    fn render(&self, _frame: &mut Frame) {
         println!(
             "InitState is rendering...\ncurrent count is: {}",
             self.counter
         );
-
-        frame.clear_color(0.4, 0.0, 0.0, 1.0);
-        frame.set_finish().unwrap();
     }
 }
 
@@ -68,13 +65,11 @@ impl Receiver<InitState> for SecondState {
 }
 
 impl Renderable for SecondState {
-    fn render(&self, frame: &mut Frame) {
+    fn render(&self, _frame: &mut Frame) {
         println!(
             "SecondState is rendering...\ncurrent count is: {}",
             self.counter
         );
-        frame.clear_color(0.0, 0.3, 0.0, 1.0);
-        frame.set_finish().unwrap();
     }
 }
 
@@ -107,14 +102,11 @@ impl Receiver<InitState> for ThirdState {
 }
 
 impl Renderable for ThirdState {
-    fn render(&self, frame: &mut Frame) {
+    fn render(&self, _frame: &mut Frame) {
         println!(
             "ThirdState is rendering...\ncurrent count is: {}",
             self.counter
         );
-
-        frame.clear_color(0.0, 0.2, 0.0, 1.0);
-        frame.set_finish().unwrap();
     }
 }
 

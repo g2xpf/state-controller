@@ -7,12 +7,7 @@ struct InitState {
     counter: i32,
 }
 
-impl Renderable for InitState {
-    fn render(&self, frame: &mut Frame) {
-        frame.clear_color(1.0, 0.0, 0.0, 1.0);
-        frame.set_finish().unwrap();
-    }
-}
+impl Renderable for InitState {}
 
 impl Updatable for InitState {
     fn update(&mut self, shifter: &mut Shifter) {

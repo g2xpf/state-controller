@@ -1,6 +1,6 @@
-use glium::{Frame, Surface};
+use glium::Frame;
 use state_controller::{
-    utils::{EaseInOutSin, Timer, TimerState},
+    utils::{EaseInOutSin, Timer},
     Event, EventHandler, IntermediateState, Receiver, Renderable, Shifter, State, Transition,
     TransitionFlow, Transitionable, Updatable, World,
 };
@@ -11,14 +11,11 @@ pub struct InitState {
 }
 
 impl Renderable for InitState {
-    fn render(&self, frame: &mut Frame) {
+    fn render(&self, _frame: &mut Frame) {
         println!(
             "InitState is rendering...\ncurrent count is: {}",
             self.counter
         );
-
-        frame.clear_color(0.2, 0.2, 0.2, 1.0);
-        frame.set_finish().unwrap();
     }
 }
 
@@ -51,14 +48,11 @@ impl Receiver<InitState> for SecondState {
 }
 
 impl Renderable for SecondState {
-    fn render(&self, frame: &mut Frame) {
+    fn render(&self, _frame: &mut Frame) {
         println!(
             "SecondState is rendering...\ncurrent count is: {}",
             self.counter
         );
-
-        frame.clear_color(0.2, 0.0, 0.0, 1.0);
-        frame.set_finish().unwrap();
     }
 }
 
@@ -95,18 +89,9 @@ impl IntermediateState for InitToSecond {
     }
 
     fn update(&mut self) -> TransitionFlow {
-        if self.timer.get_state() == TimerState::Full {
-            TransitionFlow::Break
-        } else {
-            TransitionFlow::Continue
-        }
-    }
-
-    fn render(&self, frame: &mut Frame) {
-        if let TimerState::Counting(ratio) = self.timer.get_state_easing::<EaseInOutSin>() {
-            let ratio = ratio as f32;
-            frame.clear_color(ratio, ratio, ratio, 1.0);
-            frame.set_finish().unwrap();
+        match self.timer.is_over() {
+            Some(true) => TransitionFlow::Break,
+            _ => TransitionFlow::Continue,
         }
     }
 

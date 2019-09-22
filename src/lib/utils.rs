@@ -7,4 +7,4 @@ pub use easing::{
     EaseInQuad, EaseInQuart, EaseInQuint, EaseInSin, EaseOutBack, EaseOutBounce, EaseOutCubic,
     EaseOutExpo, EaseOutQuad, EaseOutQuart, EaseOutQuint, EaseOutSin, Linear,
 };
-pub use timer::{Timer, TimerState};
+pub use timer::Timer;

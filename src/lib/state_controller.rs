@@ -74,11 +74,6 @@ impl StateController<Running> {
     }
 
     pub fn update(&mut self) {
-        if let Some(mut intermediate_state) = self.state_shifter.next_intermediate_state.take() {
-            intermediate_state.initialize();
-            self.current_intermediate_state = Some(intermediate_state);
-        }
-
         if let Some(IntermediateStateEntry(_, ref mut intermediate_state)) =
             self.current_intermediate_state
         {
@@ -104,6 +99,10 @@ impl StateController<Running> {
             next_state_entry.borrow_mut().initialize();
             mem::swap(&mut self.current_state, &mut next_state_entry);
             self.state_shifter.insert_state_entry(next_state_entry);
+        }
+
+        if let Some(intermediate_state) = self.state_shifter.next_intermediate_state.take() {
+            self.current_intermediate_state = Some(intermediate_state);
         }
     }
 

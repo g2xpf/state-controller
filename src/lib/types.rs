@@ -6,7 +6,6 @@ use std::{
 };
 
 pub mod key;
-pub(crate) mod pandora_box;
 pub mod state_entry;
 mod transition_flow;
 

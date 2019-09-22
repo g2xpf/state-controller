@@ -59,4 +59,4 @@ impl_shape_container!(Texture; |shape| {
     height: shape.height,
     angle: shape.angle,
     tex: shape.tex.deref()
-});
+}; camera_pos: (f32, f32));

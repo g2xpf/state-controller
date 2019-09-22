@@ -1,7 +1,7 @@
 use crate::{
     state::State,
     traits::{TransitionEvidence, Transitionable},
-    types::{pandora_box::PandoraBox, SharedState},
+    types::SharedState,
 };
 
 use std::{

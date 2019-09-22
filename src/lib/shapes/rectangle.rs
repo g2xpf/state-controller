@@ -45,4 +45,4 @@ impl Shape for Rectangle {
     }
 }
 
-impl_shape_container!(Rectangle; pos, width, height, color, angle);
+impl_shape_container!(Rectangle; pos, width, height, color, angle; camera_pos: (f32, f32));

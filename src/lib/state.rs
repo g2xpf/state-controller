@@ -35,10 +35,11 @@ pub trait State: Updatable + Renderable + EventHandler + Any + 'static {
         let id_pair = (current_state_id, next_state_id);
 
         // set intermediate state from Self to S if found
-        shifter.next_intermediate_state = shifter
-            .intermediate_states
-            .remove(&id_pair)
-            .map(|s| IntermediateStateEntry(id_pair, s));
+        shifter.next_intermediate_state =
+            shifter.intermediate_states.remove(&id_pair).map(|mut s| {
+                s.initialize();
+                IntermediateStateEntry(id_pair, s)
+            });
 
         // fetch next state
         let next_state = shifter
@@ -65,10 +66,11 @@ pub trait State: Updatable + Renderable + EventHandler + Any + 'static {
         let id_pair = (current_state_id, next_state_id);
 
         // set intermediate state from Self to S if found
-        shifter.next_intermediate_state = shifter
-            .intermediate_states
-            .remove(&id_pair)
-            .map(|s| IntermediateStateEntry(id_pair, s));
+        shifter.next_intermediate_state =
+            shifter.intermediate_states.remove(&id_pair).map(|mut s| {
+                s.initialize();
+                IntermediateStateEntry(id_pair, s)
+            });
 
         // fetch next state
         let next_state = shifter

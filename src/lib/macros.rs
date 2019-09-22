@@ -1,12 +1,13 @@
 #[macro_export]
 macro_rules! impl_shape_container {
-    ($Shape: ty; $($id: ident),*) => {
+    ($Shape: ty; $($id: ident),* $(; $($param:ident: $type:ty),* )?) => {
         use $crate::shapes::ShapeContainer;
         impl ShapeContainer<$Shape> {
             pub fn render<'b>(
                 &self,
                 frame: &mut glium::Frame,
-                draw_parameters: &glium::DrawParameters<'b>,
+                draw_parameters: &glium::DrawParameters<'b>
+                $($(,$param: $type)*)?
                 ) {
                 use glium::Surface;
 
@@ -17,6 +18,7 @@ macro_rules! impl_shape_container {
                             &self.render_context.index_buffer,
                             &self.render_context.program,
                             &uniform! {
+                                $($($param: $param,)*)?
                                 $(
                                     $id: shape.$id,
                                 )*
@@ -29,13 +31,14 @@ macro_rules! impl_shape_container {
         }
     };
 
-    ($Shape: ty; |$shape: ident| { $($id: ident: $value: expr),* }) => {
+    ($Shape: ty; |$shape: ident| { $($id: ident: $value: expr),* } $(; $($param:ident: $type:ty),*)?) => {
         use $crate::shapes::ShapeContainer;
         impl ShapeContainer<$Shape> {
             pub fn render<'b>(
                 &self,
                 frame: &mut glium::Frame,
-                draw_parameters: &glium::DrawParameters<'b>,
+                draw_parameters: &glium::DrawParameters<'b>
+                $($(,$param: $type)*)?
                 ) {
                 use glium::Surface;
 
@@ -46,6 +49,7 @@ macro_rules! impl_shape_container {
                             &self.render_context.index_buffer,
                             &self.render_context.program,
                             &uniform! {
+                                $($($param: $param,)*)?
                                 $(
                                     $id: $value,
                                 )+

@@ -16,13 +16,11 @@ impl Receiver<SecondState> for InitState {
 }
 
 impl Renderable for InitState {
-    fn render(&self, frame: &mut Frame) {
+    fn render(&self, _frame: &mut Frame) {
         println!(
             "InitState is rendering...\ncurrent count is: {}",
             self.counter
         );
-        frame.clear_color(0.5, 0.5, 0.5, 1.0);
-        frame.set_finish().unwrap();
     }
 }
 
@@ -54,14 +52,11 @@ impl Receiver<InitState> for SecondState {
 }
 
 impl Renderable for SecondState {
-    fn render(&self, frame: &mut Frame) {
+    fn render(&self, _frame: &mut Frame) {
         println!(
             "SecondState is rendering...\ncurrent count is: {}",
             self.counter
         );
-
-        frame.clear_color(0.0, 0.0, 0.4, 1.0);
-        frame.set_finish().unwrap();
     }
 }
 

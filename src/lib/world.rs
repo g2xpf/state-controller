@@ -5,7 +5,7 @@ use crate::{
     state::State,
     state_controller::StateController,
 };
-use glium::{glutin::EventsLoop, Display};
+use glium::{glutin::EventsLoop, Display, Surface};
 
 pub struct World<M> {
     state_controller: StateController<M>,
@@ -82,7 +82,9 @@ impl World<Running> {
 
             // rendering
             let mut frame = self.display.draw();
+            frame.clear_color(0.0, 0.0, 0.0, 1.0);
             self.state_controller.render(&mut frame);
+            frame.finish().unwrap();
         }
     }
 }

@@ -6,6 +6,7 @@ uniform vec2 pos;
 uniform float width;
 uniform float height;
 uniform float angle;
+uniform vec2 camera_pos;
 
 out vec2 texUV;
 
@@ -16,6 +17,6 @@ vec2 rotate(vec2 v){
 }
 
 void main(){
-    gl_Position = vec4(pos + rotate(vec2(width, height) * coord), 0.0, 1.0);
+    gl_Position = vec4(-camera_pos + pos + rotate(vec2(width, height) * coord), 0.0, 1.0);
     texUV = (coord + 1.0) / 2.0;
 }

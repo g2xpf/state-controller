@@ -2,10 +2,10 @@
 extern crate state_controller;
 extern crate image;
 
-use glium::{glutin, Frame, Surface};
+use glium::{glutin, Frame};
 use state_controller::{
     primitive_shape::{Circle, Rectangle, Texture},
-    utils::{Timer, TimerState},
+    utils::{EaseInOutSin, EaseOutBounce, Timer},
     Event, EventHandler, IntermediateState, Key, Receiver, Renderable, ShapeContainer, Shifter,
     State, Transition, TransitionFlow, Transitionable, Updatable, World,
 };
@@ -18,10 +18,10 @@ struct InitState {
 
 impl Renderable for InitState {
     fn render(&self, frame: &mut Frame) {
-        frame.clear_color(0.1, 0.1, 0.1, 1.0);
-        self.rectangle_container.render(frame, &Default::default());
-        self.texture_container.render(frame, &Default::default());
-        frame.set_finish().unwrap();
+        self.rectangle_container
+            .render(frame, &Default::default(), (0., 0.));
+        self.texture_container
+            .render(frame, &Default::default(), (0., 0.));
     }
 }
 
@@ -76,9 +76,8 @@ struct SecondState {
 
 impl Renderable for SecondState {
     fn render(&self, frame: &mut Frame) {
-        frame.clear_color(0.1, 0.2, 0.2, 1.0);
-        self.circle_container.render(frame, &Default::default());
-        frame.set_finish().unwrap();
+        self.circle_container
+            .render(frame, &Default::default(), (0., 0.));
     }
 }
 
@@ -151,28 +150,71 @@ impl IntermediateState for InitToSecond {
     }
 
     fn update(&mut self) -> TransitionFlow {
-        if let TimerState::Full = self.timer.get_state() {
-            TransitionFlow::Break
-        } else {
-            TransitionFlow::Continue
+        match self.timer.is_over() {
+            Some(true) => TransitionFlow::Break,
+            _ => TransitionFlow::Continue,
         }
     }
 
     fn render(&self, frame: &mut Frame) {
         let (from, to) = self.transition.borrow();
-        match self.timer.get_state() {
-            TimerState::Counting(ratio) if ratio < 0.5 => {
-                from.rectangle_container.render(frame, &Default::default());
-                from.texture_container.render(frame, &Default::default());
-                frame.clear_color(0.0, 0.0, 0.0, ratio as f32 * 2.0);
-            }
-            TimerState::Counting(ratio) => {
-                to.circle_container.render(frame, &Default::default());
-                frame.clear_color(0.0, 0.0, 0.0, (1.0 - ratio as f32) * 2.0);
+        match self.timer.get_ratio_easing::<EaseInOutSin>() {
+            Some(ratio) => {
+                let ratio = ratio as f32;
+                from.rectangle_container
+                    .render(frame, &Default::default(), (ratio * 2., 0.));
+                from.texture_container
+                    .render(frame, &Default::default(), (ratio * 2., 0.));
+                to.circle_container
+                    .render(frame, &Default::default(), (ratio * 2. - 2.0, 0.));
             }
             _ => {}
         }
-        frame.set_finish().unwrap()
+    }
+}
+
+struct SecondToInit {
+    timer: Timer,
+    transition: Transition<SecondState, InitState>,
+}
+
+impl IntermediateState for SecondToInit {
+    fn transition_location(&mut self) -> &mut dyn Transitionable {
+        &mut self.transition
+    }
+
+    fn initialize(&mut self) {
+        self.timer.start();
+    }
+
+    fn finalize(&mut self) {
+        self.timer.stop();
+    }
+
+    fn update(&mut self) -> TransitionFlow {
+        match self.timer.is_over() {
+            Some(true) => TransitionFlow::Break,
+            _ => TransitionFlow::Continue,
+        }
+    }
+
+    fn render(&self, frame: &mut Frame) {
+        let (from, to) = self.transition.borrow();
+        match self.timer.get_ratio_easing::<EaseOutBounce>() {
+            Some(ratio) => {
+                let ratio = ratio as f32;
+                to.rectangle_container
+                    .render(frame, &Default::default(), ((1. - ratio) * 2., 0.));
+                to.texture_container
+                    .render(frame, &Default::default(), ((1. - ratio) * 2., 0.));
+                from.circle_container.render(
+                    frame,
+                    &Default::default(),
+                    ((1. - ratio) * 2. - 2.0, 0.),
+                );
+            }
+            _ => {}
+        }
     }
 }
 
@@ -227,9 +269,15 @@ fn main() {
         transition: Transition::new(),
     };
 
+    let second_to_init = SecondToInit {
+        timer: Timer::from_millis(500),
+        transition: Transition::new(),
+    };
+
     let mut world = World::new(events_loop, display, init_state)
         .register_state(second_state)
         .register_transition::<InitState, SecondState, _>(init_to_second)
+        .register_transition::<SecondState, InitState, _>(second_to_init)
         .finalize();
 
     world.run();
