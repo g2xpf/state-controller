@@ -2,7 +2,7 @@ extern crate state_controller;
 
 use glium::{Frame, Surface};
 use state_controller::{
-    utils::{Linear, Timer},
+    utils::{Linear, Timer, TimerState},
     EventHandler, Renderable, Shifter, State, Updatable, World,
 };
 #[derive(Default)]
@@ -25,7 +25,7 @@ impl Renderable for InitState {
 
 impl Updatable for InitState {
     fn update(&mut self, _shifter: &mut Shifter) {
-        if let Some(ratio) = self.timer.get_ratio_easing::<Linear>() {
+        if let TimerState::Counting(ratio) = self.timer.get_ratio_easing::<Linear>() {
             println!("progress: {}", ratio);
         } else {
             std::process::exit(0);
