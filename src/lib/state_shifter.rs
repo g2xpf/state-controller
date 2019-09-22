@@ -40,7 +40,7 @@ impl<M> StateShifter<M> {
             let transition_location = transition_location
                 .downcast_mut::<Transition<F, T>>()
                 .unwrap();
-            *transition_location = Transition::<F, T>::new(from, to);
+            *transition_location = Transition::<F, T>::from_states(from, to);
             let transition_id = (TypeId::of::<F>(), TypeId::of::<T>());
             self.intermediate_states
                 .insert(transition_id, Box::new(intermediate_state));

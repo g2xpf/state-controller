@@ -4,21 +4,24 @@ use crate::{
     types::{pandora_box::PandoraBox, SharedState},
 };
 
-use std::{cell::RefCell, rc::Rc};
+use std::{
+    cell::{Ref, RefCell, RefMut},
+    rc::Rc,
+};
 
-fn clone_downcasted_state<S>(orig: &SharedState) -> PandoraBox<Rc<RefCell<S>>>
+fn clone_downcasted_state<S>(orig: &SharedState) -> Option<Rc<RefCell<S>>>
 where
     S: State,
 {
     let rc = Rc::clone(orig);
     let ptr = Rc::into_raw(rc) as *const RefCell<dyn State> as *const RefCell<S>;
-    PandoraBox::new(unsafe { Rc::from_raw(ptr) })
+    Some(unsafe { Rc::from_raw(ptr) })
 }
 
 #[derive(Default)]
 pub struct Transition<F, T> {
-    pub from: PandoraBox<Rc<RefCell<F>>>,
-    pub to: PandoraBox<Rc<RefCell<T>>>,
+    pub(crate) from: Option<Rc<RefCell<F>>>,
+    pub(crate) to: Option<Rc<RefCell<T>>>,
 }
 
 impl<F, T> Transition<F, T>
@@ -26,10 +29,31 @@ where
     F: State,
     T: State,
 {
-    pub(crate) fn new(from: &SharedState, to: &SharedState) -> Self {
+    pub fn new() -> Self {
+        Transition {
+            from: None,
+            to: None,
+        }
+    }
+
+    pub(crate) fn from_states(from: &SharedState, to: &SharedState) -> Self {
         let from = clone_downcasted_state::<F>(from);
         let to = clone_downcasted_state::<T>(to);
         Transition { from, to }
+    }
+
+    pub fn borrow(&self) -> (Ref<F>, Ref<T>) {
+        (
+            self.from.as_ref().unwrap().borrow(),
+            self.to.as_ref().unwrap().borrow(),
+        )
+    }
+
+    pub fn borrow_mut(&mut self) -> (RefMut<F>, RefMut<T>) {
+        (
+            self.from.as_mut().unwrap().borrow_mut(),
+            self.to.as_mut().unwrap().borrow_mut(),
+        )
     }
 }
 
