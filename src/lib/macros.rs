@@ -2,6 +2,7 @@
 macro_rules! impl_shape_container {
     ($Shape: ty; $($id: ident),* $(; $($param:ident: $type:ty),* )?) => {
         use $crate::shapes::ShapeContainer;
+        #[allow(non_snake_case)]
         impl ShapeContainer<$Shape> {
             pub fn render<'b>(
                 &self,
@@ -33,6 +34,7 @@ macro_rules! impl_shape_container {
 
     ($Shape: ty; |$shape: ident| { $($id: ident: $value: expr),* } $(; $($param:ident: $type:ty),*)?) => {
         use $crate::shapes::ShapeContainer;
+        #[allow(non_snake_case)]
         impl ShapeContainer<$Shape> {
             pub fn render<'b>(
                 &self,
