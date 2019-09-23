@@ -12,7 +12,7 @@ use state_controller::{
 
 struct Global {
     resolution: (i32, i32),
-    timer: Timer,
+    _timer: Timer,
 }
 
 impl Renderable for Global {}
@@ -285,7 +285,7 @@ fn main() {
     };
 
     let global = Global {
-        timer: Timer::from_millis(std::u64::MAX),
+        _timer: Timer::from_millis(std::u64::MAX),
         resolution: {
             let (w, h) = display.get_framebuffer_dimensions();
             (w as i32, h as i32)
