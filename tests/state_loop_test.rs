@@ -27,11 +27,11 @@ impl Renderable for InitState {
 }
 
 impl Updatable for InitState {
-    fn update(&mut self, shifter: &mut Shifter) {
+    fn update(&mut self, state_controller: &mut Shifter) {
         self.counter += 1;
 
         if self.counter % 10 == 0 {
-            shifter.shift::<Self, SecondState>(self.counter);
+            state_controller.shift::<Self, SecondState>(self.counter);
         }
     }
 }
@@ -66,12 +66,12 @@ impl Renderable for SecondState {
 }
 
 impl Updatable for SecondState {
-    fn update(&mut self, shifter: &mut Shifter) {
+    fn update(&mut self, state_controller: &mut Shifter) {
         self.counter += 1;
 
         match self.counter % 20 {
             0 if self.counter == 40 => std::process::exit(0),
-            0 => shifter.shift::<Self, InitState>(self.counter),
+            0 => state_controller.shift::<Self, InitState>(self.counter),
             _ => (),
         }
     }

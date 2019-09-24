@@ -19,11 +19,11 @@ impl Renderable for InitState {
 }
 
 impl Updatable for InitState {
-    fn update(&mut self, shifter: &mut Shifter) {
+    fn update(&mut self, state_controller: &mut Shifter) {
         self.counter += 1;
         std::thread::sleep(std::time::Duration::from_millis(16));
         if self.counter >= 10 {
-            shifter.shift::<Self, SecondState>(self.counter);
+            state_controller.shift::<Self, SecondState>(self.counter);
         }
     }
 }
@@ -59,7 +59,7 @@ impl Renderable for SecondState {
 }
 
 impl Updatable for SecondState {
-    fn update(&mut self, _shifter: &mut Shifter) {
+    fn update(&mut self, _state_controller: &mut Shifter) {
         self.counter += 1;
         std::thread::sleep(std::time::Duration::from_millis(16));
         if self.counter >= 30 {
