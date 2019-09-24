@@ -38,7 +38,7 @@ easing!(EaseInOutQuint, t -> { if t < 0.5 { 16.0*t*t*t*t*t} else { let t = t - 1
 
 easing!(EaseInSin, t -> {1.0 + (PI / 2.0 * t - PI / 2.0).sin() });
 easing!(EaseOutSin, t -> {(PI / 2.0 * t).sin()});
-easing!(EaseInOutSin, t -> {1.0 + (PI * t - PI / 2.0).sin() / 2.0});
+easing!(EaseInOutSin, t -> {(1.0 + (PI * t - PI / 2.0).sin()) / 2.0});
 
 easing!(EaseInExpo, t -> { if t >= 1.0 { 1.0 } else { (10.0 * (t - 1.0)).exp2()}});
 easing!(EaseOutExpo, t -> { if t >= 1.0 { 1.0 } else { 1.0 - (-10.0 * t).exp2()}});

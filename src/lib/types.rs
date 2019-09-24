@@ -1,28 +1,20 @@
-use crate::{controller_mode::Running, state::State, state_shifter::StateShifter};
-use std::ops::{Deref, DerefMut};
+use crate::{shifter_mode::Running, state::State, state_shifter::StateShifter};
+use std::{
+    any::TypeId,
+    cell::{Ref, RefCell, RefMut},
+    rc::Rc,
+};
 
+pub mod key;
+pub mod state_entry;
+mod transition_flow;
+
+pub use transition_flow::TransitionFlow;
+pub type Position = glium::glutin::dpi::LogicalPosition;
 pub type Shifter = StateShifter<Running>;
-pub(crate) type StateID = std::any::TypeId;
-pub(crate) struct StateEntry(pub(crate) StateID, pub(crate) Box<dyn State>);
-
-impl StateEntry {
-    pub fn new<S>(state: S) -> Self
-    where
-        S: State + 'static,
-    {
-        StateEntry(StateID::of::<S>(), Box::new(state))
-    }
-}
-
-impl Deref for StateEntry {
-    type Target = Box<dyn State>;
-    fn deref(&self) -> &Self::Target {
-        &self.1
-    }
-}
-
-impl DerefMut for StateEntry {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.1
-    }
-}
+pub type SharedState = Rc<RefCell<dyn State>>;
+pub type StateRef<'a, S> = Ref<'a, S>;
+pub type StateRefMut<'a, S> = RefMut<'a, S>;
+pub trait Transitionable {}
+pub(crate) type StateID = TypeId;
+pub(crate) type IntermediateStateID = (TypeId, TypeId);

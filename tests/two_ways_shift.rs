@@ -27,24 +27,21 @@ impl Receiver<ThirdState> for InitState {
 impl EventHandler for InitState {}
 
 impl Renderable for InitState {
-    fn render(&self, frame: &mut Frame) {
+    fn render(&self, _frame: &mut Frame) {
         println!(
             "InitState is rendering...\ncurrent count is: {}",
             self.counter
         );
-
-        frame.clear_color(0.4, 0.0, 0.0, 1.0);
-        frame.set_finish().unwrap();
     }
 }
 
 impl Updatable for InitState {
-    fn update(&mut self, state_controller: &mut Shifter) {
+    fn update(&mut self, shifter: &mut Shifter) {
         self.counter += 1;
 
         match self.counter {
-            10 => state_controller.shift::<Self, SecondState>(self.counter),
-            30 => state_controller.shift::<Self, ThirdState>(self.counter),
+            10 => self.shift_with::<SecondState>(shifter, self.counter),
+            30 => self.shift_with::<ThirdState>(shifter, self.counter),
             50 => std::process::exit(0),
             _ => (),
         }
@@ -68,22 +65,20 @@ impl Receiver<InitState> for SecondState {
 }
 
 impl Renderable for SecondState {
-    fn render(&self, frame: &mut Frame) {
+    fn render(&self, _frame: &mut Frame) {
         println!(
             "SecondState is rendering...\ncurrent count is: {}",
             self.counter
         );
-        frame.clear_color(0.0, 0.3, 0.0, 1.0);
-        frame.set_finish().unwrap();
     }
 }
 
 impl Updatable for SecondState {
-    fn update(&mut self, state_controller: &mut Shifter) {
+    fn update(&mut self, shifter: &mut Shifter) {
         self.counter += 1;
 
         if self.counter == 20 {
-            state_controller.shift::<Self, InitState>(self.counter);
+            self.shift_with::<InitState>(shifter, self.counter);
         }
     }
 }
@@ -107,23 +102,20 @@ impl Receiver<InitState> for ThirdState {
 }
 
 impl Renderable for ThirdState {
-    fn render(&self, frame: &mut Frame) {
+    fn render(&self, _frame: &mut Frame) {
         println!(
             "ThirdState is rendering...\ncurrent count is: {}",
             self.counter
         );
-
-        frame.clear_color(0.0, 0.2, 0.0, 1.0);
-        frame.set_finish().unwrap();
     }
 }
 
 impl Updatable for ThirdState {
-    fn update(&mut self, state_controller: &mut Shifter) {
+    fn update(&mut self, shifter: &mut Shifter) {
         self.counter += 1;
 
         if self.counter == 40 {
-            state_controller.shift::<Self, InitState>(self.counter);
+            self.shift_with::<InitState>(shifter, self.counter);
         }
     }
 }
@@ -147,10 +139,10 @@ fn two_ways_shift() {
     let init_state: InitState = Default::default();
     let second_state: SecondState = Default::default();
     let third_state: ThirdState = Default::default();
-    let mut world = World::new(events_loop, display, init_state);
-    world.register(second_state);
-    world.register(third_state);
+    let mut world = World::new(events_loop, display, init_state)
+        .register_state(second_state)
+        .register_state(third_state)
+        .finalize();
 
-    let mut world = world.finalize();
     world.run();
 }

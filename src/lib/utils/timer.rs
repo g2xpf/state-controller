@@ -48,21 +48,22 @@ impl Timer {
         self.start();
     }
 
-    pub fn get_ratio(&mut self) -> Option<f64> {
-        if self.timer.is_none() {
-            return None;
-        }
+    pub fn is_over(&self) -> Option<bool> {
+        let timer = self.timer?;
+        Some(timer.elapsed() > self.limit)
+    }
 
-        let current_duration = self.timer.unwrap().elapsed();
+    pub fn get_ratio(&self) -> Option<f64> {
+        let timer = self.timer?;
+        let current_duration = timer.elapsed();
         if current_duration > self.limit {
-            self.timer = None;
             return Some(1.0);
         }
         let ratio = current_duration.as_nanos() as f64 / self.limit.as_nanos() as f64;
         Some(ratio)
     }
 
-    pub fn get_ratio_easing<E>(&mut self) -> Option<f64>
+    pub fn get_ratio_easing<E>(&self) -> Option<f64>
     where
         E: Easing,
     {

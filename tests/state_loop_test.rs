@@ -16,22 +16,20 @@ impl Receiver<SecondState> for InitState {
 }
 
 impl Renderable for InitState {
-    fn render(&self, frame: &mut Frame) {
+    fn render(&self, _frame: &mut Frame) {
         println!(
             "InitState is rendering...\ncurrent count is: {}",
             self.counter
         );
-        frame.clear_color(0.5, 0.5, 0.5, 1.0);
-        frame.set_finish().unwrap();
     }
 }
 
 impl Updatable for InitState {
-    fn update(&mut self, state_controller: &mut Shifter) {
+    fn update(&mut self, shifter: &mut Shifter) {
         self.counter += 1;
 
         if self.counter % 10 == 0 {
-            state_controller.shift::<Self, SecondState>(self.counter);
+            self.shift_with::<SecondState>(shifter, self.counter);
         }
     }
 }
@@ -54,24 +52,21 @@ impl Receiver<InitState> for SecondState {
 }
 
 impl Renderable for SecondState {
-    fn render(&self, frame: &mut Frame) {
+    fn render(&self, _frame: &mut Frame) {
         println!(
             "SecondState is rendering...\ncurrent count is: {}",
             self.counter
         );
-
-        frame.clear_color(0.0, 0.0, 0.4, 1.0);
-        frame.set_finish().unwrap();
     }
 }
 
 impl Updatable for SecondState {
-    fn update(&mut self, state_controller: &mut Shifter) {
+    fn update(&mut self, shifter: &mut Shifter) {
         self.counter += 1;
 
         match self.counter % 20 {
             0 if self.counter == 40 => std::process::exit(0),
-            0 => state_controller.shift::<Self, InitState>(self.counter),
+            0 => self.shift_with::<InitState>(shifter, self.counter),
             _ => (),
         }
     }
@@ -95,9 +90,9 @@ fn state_loop_test() {
 
     let init_state: InitState = Default::default();
     let second_state: SecondState = Default::default();
-    let mut world = World::new(events_loop, display, init_state);
-    world.register(second_state);
+    let mut world = World::new(events_loop, display, init_state)
+        .register_state(second_state)
+        .finalize();
 
-    let mut world = world.finalize();
     world.run();
 }

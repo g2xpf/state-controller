@@ -9,18 +9,16 @@ pub struct InitState {
 }
 
 impl Renderable for InitState {
-    fn render(&self, frame: &mut Frame) {
+    fn render(&self, _frame: &mut Frame) {
         println!(
             "InitState is rendering...\ncurrent count is: {}",
             self.counter
         );
-        frame.clear_color(0.5, 0.5, 0.5, 1.0);
-        frame.set_finish().unwrap();
     }
 }
 
 impl Updatable for InitState {
-    fn update(&mut self, _state_controller: &mut Shifter) {
+    fn update(&mut self, _shifter: &mut Shifter) {
         self.counter += 1;
         if self.counter >= 10 {
             std::process::exit(0);

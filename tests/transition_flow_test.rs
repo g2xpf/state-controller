@@ -1,5 +1,9 @@
-use glium::{Frame, Surface};
-use state_controller::{EventHandler, Receiver, Renderable, Shifter, State, Updatable, World};
+use glium::Frame;
+use state_controller::{
+    utils::{EaseInOutSin, Timer},
+    Event, EventHandler, IntermediateState, Receiver, Renderable, Shifter, State, Transition,
+    TransitionFlow, Transitionable, Updatable, World,
+};
 
 #[derive(Default)]
 pub struct InitState {
@@ -19,7 +23,7 @@ impl Updatable for InitState {
     fn update(&mut self, state_shifter: &mut Shifter) {
         self.counter += 1;
         std::thread::sleep(std::time::Duration::from_millis(16));
-        if self.counter >= 10 {
+        if self.counter >= 50 {
             self.shift_with::<SecondState>(state_shifter, self.counter);
         }
     }
@@ -56,7 +60,7 @@ impl Updatable for SecondState {
     fn update(&mut self, _shifter: &mut Shifter) {
         self.counter += 1;
         std::thread::sleep(std::time::Duration::from_millis(16));
-        if self.counter >= 30 {
+        if self.counter >= 100 {
             std::process::exit(0);
         }
     }
@@ -66,8 +70,38 @@ impl State for SecondState {}
 
 impl EventHandler for SecondState {}
 
+struct InitToSecond {
+    timer: Timer,
+    transition: Transition<InitState, SecondState>,
+}
+
+impl IntermediateState for InitToSecond {
+    fn transition_location(&mut self) -> &mut dyn Transitionable {
+        &mut self.transition as &mut dyn Transitionable
+    }
+
+    fn initialize(&mut self) {
+        self.timer.start();
+    }
+
+    fn finalize(&mut self) {
+        self.timer.stop();
+    }
+
+    fn update(&mut self) -> TransitionFlow {
+        match self.timer.is_over() {
+            Some(true) => TransitionFlow::Break,
+            _ => TransitionFlow::Continue,
+        }
+    }
+
+    fn handle(&mut self, _event: &Event) -> TransitionFlow {
+        TransitionFlow::Break
+    }
+}
+
 #[test]
-fn two_states_test() {
+fn transition_flow_test() {
     std::thread::sleep(std::time::Duration::from_millis(1000));
 
     use glium::glutin;
@@ -81,8 +115,15 @@ fn two_states_test() {
 
     let init_state: InitState = Default::default();
     let second_state: SecondState = Default::default();
+
+    let init_to_second = InitToSecond {
+        timer: Timer::from_millis(3000),
+        transition: Default::default(),
+    };
+
     let mut world = World::new(events_loop, display, init_state)
         .register_state(second_state)
+        .register_transition::<InitState, SecondState, _>(init_to_second)
         .finalize();
 
     world.run();
