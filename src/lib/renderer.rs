@@ -13,9 +13,8 @@ where
 impl<S> RenderContext<S>
 where
     S: Shape,
-    S::Vertex: glium::Vertex,
 {
-    pub fn new(display: &Display) -> Self {
+    pub(crate) fn new(display: &Display) -> Self {
         RenderContext {
             program: Program::from_source(display, S::vertex_src(), S::fragment_src(), None)
                 .unwrap(),

@@ -1,5 +1,5 @@
 use crate::renderer::RenderContext;
-use glium::index;
+use glium::{index, Vertex};
 use std::{
     ops::{Deref, DerefMut},
     rc::Rc,
@@ -16,7 +16,7 @@ pub mod primitive_shape {
 }
 
 pub trait Shape {
-    type Vertex: Copy;
+    type Vertex: Vertex;
 
     fn vertex() -> Vec<Self::Vertex>;
     fn index() -> Vec<u32>;
@@ -39,7 +39,6 @@ where
 impl<S> ShapeContainer<S>
 where
     S: Shape,
-    <S as Shape>::Vertex: glium::Vertex,
 {
     pub fn new<'a>(display: &'a glium::Display) -> Self {
         ShapeContainer {
