@@ -2,11 +2,14 @@ use crate::renderer::RawRenderContext;
 use glium::{index, Display, Vertex};
 use std::ops::{Deref, DerefMut};
 
+mod text;
+
+pub use text::Text;
+
 pub trait PolyShape {
     type Vertex: Vertex;
 
-    fn vertex(&self) -> Vec<Self::Vertex>;
-    fn index(&self) -> Vec<u32>;
+    fn vertex_index(&self) -> (Vec<Self::Vertex>, Vec<u32>);
     fn render_mode() -> index::PrimitiveType {
         index::PrimitiveType::TrianglesList
     }

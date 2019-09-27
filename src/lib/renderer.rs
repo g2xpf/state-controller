@@ -47,22 +47,13 @@ impl RawRenderContext {
 
     pub fn create_buffers<S>(
         &self,
-        shapes: &Vec<S>,
+        shape: &S,
     ) -> Result<(VertexBuffer<S::Vertex>, IndexBuffer<u32>), Box<dyn Error>>
     where
-        S: Shape,
+        S: PolyShape,
     {
         // TODO: Buffering for faster construction
-        let vertex_count = S::vertex().len() as u32;
-        let shape_count = shapes.len();
-        let vertices: Vec<S::Vertex> = shapes.iter().flat_map(|_| S::vertex()).collect();
-        let indices: Vec<u32> = (0..shape_count)
-            .flat_map(|i| {
-                S::index()
-                    .into_iter()
-                    .map(move |index| i as u32 + index * vertex_count)
-            })
-            .collect();
+        let (vertices, indices) = shape.vertex_index();
         let vbo = VertexBuffer::new(&self.display, &vertices)?;
         let ibo = IndexBuffer::new(&self.display, S::render_mode(), &indices)?;
         Ok((vbo, ibo))

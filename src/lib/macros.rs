@@ -66,11 +66,11 @@ macro_rules! impl_shape_container {
 }
 
 #[macro_export]
-macro_rules! impl_poly_shape_container {
+macro_rules! impl_polyshape_container {
     ($Shape: ty; $($id: ident),* $(; $($param:ident: $type:ty),* )?) => {
         use $crate::polyshapes::PolyShapeContainer;
         #[allow(non_snake_case)]
-        impl ShapeContainer<$Shape> {
+        impl PolyShapeContainer<$Shape> {
             pub fn render<'b>(
                 &self,
                 frame: &mut glium::Frame,
@@ -80,12 +80,12 @@ macro_rules! impl_poly_shape_container {
                 use glium::Surface;
 
                 for shape in self.shapes.iter() {
-                    let (vbo, ibo) = self.create_buffers(&shape.vertex()).unwrap();
+                    let (vbo, ibo) = self.raw_render_context.create_buffers(shape).unwrap();
                     frame
                         .draw(
-                            &vbo
+                            &vbo,
                             &ibo,
-                            &self.render_context.program,
+                            &self.raw_render_context.program,
                             &uniform! {
                                 $($($param: $param,)*)?
                                 $(
@@ -101,9 +101,9 @@ macro_rules! impl_poly_shape_container {
     };
 
     ($Shape: ty; |$shape: ident| { $($id: ident: $value: expr),* } $(; $($param:ident: $type:ty),*)?) => {
-        use $crate::shapes::ShapeContainer;
+        use $crate::polyshapes::PolyShapeContainer;
         #[allow(non_snake_case)]
-        impl ShapeContainer<$Shape> {
+        impl PolyShapeContainer<$Shape> {
             pub fn render<'b>(
                 &self,
                 frame: &mut glium::Frame,
@@ -113,12 +113,12 @@ macro_rules! impl_poly_shape_container {
                 use glium::Surface;
 
                 for $shape in self.shapes.iter() {
-                    let (vbo, ibo) = self.create_buffers(&shape.vertex()).unwrap();
+                    let (vbo, ibo) = self.raw_render_context.create_buffers($shape).unwrap();
                     frame
                         .draw(
-                            &vbo
+                            &vbo,
                             &ibo,
-                            &self.render_context.program,
+                            &self.raw_render_context.program,
                             &uniform! {
                                 $($($param: $param,)*)?
                                 $(

@@ -4,10 +4,10 @@ extern crate image;
 
 use glium::{glutin, Frame};
 use state_controller::{
-    primitive_shape::{Circle, Rectangle, Texture},
-    utils::{EaseInOutSin, EaseOutBounce, Timer},
-    Event, EventHandler, IntermediateState, Key, Parent, Receiver, Renderable, ShapeContainer,
-    Shifter, State, Transition, TransitionFlow, Transitionable, Updatable, World,
+    primitive_shape::{Circle, Rectangle, Text, Texture},
+    utils::{EaseInOutSin, EaseOutBounce, FontStyler, Timer},
+    Event, EventHandler, IntermediateState, Key, Parent, PolyShapeContainer, Receiver, Renderable,
+    ShapeContainer, Shifter, State, Transition, TransitionFlow, Transitionable, Updatable, World,
 };
 
 struct Global {
@@ -82,6 +82,7 @@ impl State for InitState {}
 struct SecondState {
     counter: u64,
     circle_container: ShapeContainer<Circle>,
+    text_container: PolyShapeContainer<Text>,
 }
 
 impl Renderable for SecondState {
@@ -89,6 +90,15 @@ impl Renderable for SecondState {
         let parent = self.parent_ref::<Global>(shifter);
         self.circle_container
             .render(frame, &Default::default(), (0., 0.), parent.resolution);
+        self.text_container.render(
+            frame,
+            &glium::DrawParameters {
+                // blend: glium::Blend::alpha_blending(),
+                ..Default::default()
+            },
+            (0.5, 0.5, 0.5),
+            (0., 0.),
+        );
     }
 }
 
@@ -99,6 +109,9 @@ impl Updatable for SecondState {
             self.shift::<InitState>(shifter);
         }
         self.counter += 1;
+
+        self.text_container[0].theta += 0.0;
+        self.text_container[0].font.layout_paragraph();
     }
 }
 
@@ -109,6 +122,18 @@ impl EventHandler for SecondState {
         }
         for circle in self.circle_container.iter_mut() {
             let dr = 0.03;
+            if event.key(Key::A).is_pressed() {
+                self.text_container[0].pos[0] -= dr;
+            }
+            if event.key(Key::D).is_pressed() {
+                self.text_container[0].pos[0] += dr;
+            }
+            if event.key(Key::W).is_pressed() {
+                self.text_container[0].pos[1] += dr;
+            }
+            if event.key(Key::S).is_pressed() {
+                self.text_container[0].pos[1] -= dr;
+            }
             if event.key(Key::Right).is_pressed() {
                 circle.pos[0] += dr;
             }
@@ -279,9 +304,27 @@ fn main() {
         color: [0.0, 0.4, 0.4],
     });
 
+    let font_styler = FontStyler::new(
+        &display,
+        include_bytes!("../static/GenRyuMinJP-Regular.ttf"),
+        (640., 640.).into(),
+    );
+
+    let mut text_container = PolyShapeContainer::<Text>::new(&display);
+    text_container.push({
+        let mut text = Text {
+            font: font_styler,
+            pos: [0., 0.],
+            theta: 0.,
+        };
+        text.font.set_text("Hello, world!");
+        text
+    });
+
     let second_state: SecondState = SecondState {
         counter: 0,
         circle_container,
+        text_container,
     };
 
     let global = Global {

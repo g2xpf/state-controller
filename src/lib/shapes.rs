@@ -9,11 +9,9 @@ mod circle;
 mod rectangle;
 mod texture;
 
-pub mod primitive_shape {
-    pub use super::circle::Circle;
-    pub use super::rectangle::Rectangle;
-    pub use super::texture::Texture;
-}
+pub use circle::Circle;
+pub use rectangle::Rectangle;
+pub use texture::Texture;
 
 pub trait Shape {
     type Vertex: Vertex;

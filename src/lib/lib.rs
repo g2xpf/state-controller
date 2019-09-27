@@ -21,13 +21,18 @@ mod types;
 pub mod utils;
 mod world;
 
+pub mod primitive_shape {
+    pub use super::polyshapes::Text;
+    pub use super::shapes::{Circle, Rectangle, Texture};
+}
+
 pub use event::Event;
 pub use intermediate_state::IntermediateState;
 pub use parent::Parent;
 pub use polyshapes::{PolyShape, PolyShapeContainer};
 pub use receiver::Receiver;
 pub use renderer::RenderContext;
-pub use shapes::{primitive_shape, Shape, ShapeContainer};
+pub use shapes::{Shape, ShapeContainer};
 pub use state::State;
 pub use state_transition::Transition;
 pub use traits::{EventHandler, Renderable, Transitionable, Updatable};
