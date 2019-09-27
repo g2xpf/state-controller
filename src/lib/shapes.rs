@@ -53,14 +53,6 @@ where
             render_context: Rc::clone(&self.render_context),
         }
     }
-
-    pub fn push(&mut self, s: S) {
-        self.shapes.push(s);
-    }
-
-    pub fn clear(&mut self) {
-        self.shapes = Vec::new();
-    }
 }
 
 impl<S> Deref for ShapeContainer<S>
