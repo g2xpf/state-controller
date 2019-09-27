@@ -3,7 +3,7 @@ use glium::texture::{ClientFormat, MipmapsOption, RawImage2d, Texture2d, Uncompr
 use glium::uniforms::{MagnifySamplerFilter, Sampler};
 use glium::Display;
 use rusttype::gpu_cache::Cache;
-use rusttype::{point, vector, Font, PositionedGlyph, Rect, Scale};
+use rusttype::{point, Font, PositionedGlyph, Scale};
 use std::borrow::Cow;
 use std::rc::Rc;
 
@@ -29,6 +29,13 @@ impl<'a> FontStyler<'a> {
     pub fn new(display: &Display, font: &'a [u8], logical_size: LogicalSize) -> Self {
         let font = Font::from_bytes(font).unwrap();
         let dpi_factor = display.gl_window().window().get_hidpi_factor() as f64;
+        let (inner_width, _) = display
+            .gl_window()
+            .window()
+            .get_inner_size()
+            .unwrap()
+            .to_physical(dpi_factor)
+            .into();
         let (cache_width, cache_height) = (
             (logical_size.width * dpi_factor) as u32,
             (logical_size.height * dpi_factor) as u32,
@@ -54,14 +61,14 @@ impl<'a> FontStyler<'a> {
             font: Rc::new(font),
             glyphs: Vec::new(),
             text: String::from(""),
-            // wrap_bound: std::u32::MAX,
-            wrap_bound: 512,
+            wrap_bound: inner_width,
             font_size: 24.0,
         }
     }
 
     pub fn set_wrap_bound(&mut self, bound: u32) {
-        self.wrap_bound = bound;
+        let dpi_factor = self.display.gl_window().window().get_hidpi_factor();
+        self.wrap_bound = bound * dpi_factor as u32;
     }
 
     pub fn set_text(&mut self, text: &str) {
