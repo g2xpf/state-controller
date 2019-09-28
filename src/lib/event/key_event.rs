@@ -48,7 +48,7 @@ impl KeyEntry {
 
 pub struct KeyEvent {
     keys: [KeyEntry; CODE_KINDS],
-    text: String,
+    pub(crate) text: String,
     changed: Vec<Key>,
 }
 
@@ -108,5 +108,9 @@ impl KeyEvent {
 
     pub fn register_text(&mut self, c: char) {
         self.text.push(c);
+    }
+
+    pub(crate) fn initialize(&mut self) {
+        self.text = String::new();
     }
 }

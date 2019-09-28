@@ -73,6 +73,7 @@ impl World<Running> {
         self.state_controller.initialize();
         loop {
             // event handling
+            self.event_controller.initialize();
             self.event_controller.poll_events();
             self.state_controller
                 .handle_events(&self.event_controller.event);

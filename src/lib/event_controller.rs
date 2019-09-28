@@ -19,4 +19,8 @@ impl EventController {
         event.reset();
         self.events_loop.poll_events(|ev| event.register(&ev));
     }
+
+    pub fn initialize(&mut self) {
+        self.event.initialize();
+    }
 }

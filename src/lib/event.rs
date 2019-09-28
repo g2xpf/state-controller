@@ -38,6 +38,10 @@ impl Event {
         &self.key.key(key)
     }
 
+    pub fn text(&self) -> &str {
+        &self.key.text[..]
+    }
+
     pub fn reset(&mut self) {
         self.key.reset();
         self.cursor.reset();
@@ -90,5 +94,9 @@ impl Event {
                 self.app.set_suspended(*b);
             }
         }
+    }
+
+    pub(crate) fn initialize(&mut self) {
+        self.key.initialize();
     }
 }
