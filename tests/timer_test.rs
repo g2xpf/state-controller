@@ -13,7 +13,7 @@ pub struct InitState {
 }
 
 impl Renderable for InitState {
-    fn render(&self, _frame: &mut Frame) {
+    fn render(&self, _shifter: &Shifter, _frame: &mut Frame) {
         println!(
             "InitState is rendering...\ncurrent count is: {}",
             self.counter

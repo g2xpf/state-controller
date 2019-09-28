@@ -1,8 +1,7 @@
 use glium::Frame;
 use state_controller::{
-    utils::{EaseInOutSin, Timer},
-    Event, EventHandler, IntermediateState, Receiver, Renderable, Shifter, State, Transition,
-    TransitionFlow, Transitionable, Updatable, World,
+    utils::Timer, Event, EventHandler, IntermediateState, Receiver, Renderable, Shifter, State,
+    Transition, TransitionFlow, Transitionable, Updatable, World,
 };
 
 #[derive(Default)]
@@ -11,7 +10,7 @@ pub struct InitState {
 }
 
 impl Renderable for InitState {
-    fn render(&self, _frame: &mut Frame) {
+    fn render(&self, _shifter: &Shifter, _frame: &mut Frame) {
         println!(
             "InitState is rendering...\ncurrent count is: {}",
             self.counter
@@ -48,7 +47,7 @@ impl Receiver<InitState> for SecondState {
 }
 
 impl Renderable for SecondState {
-    fn render(&self, _frame: &mut Frame) {
+    fn render(&self, _shifter: &Shifter, _frame: &mut Frame) {
         println!(
             "SecondState is rendering...\ncurrent count is: {}",
             self.counter

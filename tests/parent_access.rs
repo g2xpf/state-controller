@@ -1,5 +1,4 @@
 // state family: InitState -> SecondState
-use glium::{Frame, Surface};
 use state_controller::{EventHandler, Parent, Renderable, Shifter, State, Updatable, World};
 
 #[derive(Default)]

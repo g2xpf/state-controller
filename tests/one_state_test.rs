@@ -1,6 +1,6 @@
 extern crate state_controller;
 
-use glium::{Frame, Surface};
+use glium::Frame;
 use state_controller::{EventHandler, Renderable, Shifter, State, Updatable, World};
 
 #[derive(Default)]
@@ -9,7 +9,7 @@ pub struct InitState {
 }
 
 impl Renderable for InitState {
-    fn render(&self, _frame: &mut Frame) {
+    fn render(&self, _shifter: &Shifter, _frame: &mut Frame) {
         println!(
             "InitState is rendering...\ncurrent count is: {}",
             self.counter

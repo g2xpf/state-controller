@@ -1,4 +1,4 @@
-use glium::{Frame, Surface};
+use glium::Frame;
 use state_controller::{EventHandler, Receiver, Renderable, Shifter, State, Updatable, World};
 
 #[derive(Default)]
@@ -16,7 +16,7 @@ impl Receiver<SecondState> for InitState {
 }
 
 impl Renderable for InitState {
-    fn render(&self, _frame: &mut Frame) {
+    fn render(&self, _shifter: &Shifter, _frame: &mut Frame) {
         println!(
             "InitState is rendering...\ncurrent count is: {}",
             self.counter
@@ -52,7 +52,7 @@ impl Receiver<InitState> for SecondState {
 }
 
 impl Renderable for SecondState {
-    fn render(&self, _frame: &mut Frame) {
+    fn render(&self, _shifter: &Shifter, _frame: &mut Frame) {
         println!(
             "SecondState is rendering...\ncurrent count is: {}",
             self.counter
