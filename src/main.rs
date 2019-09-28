@@ -317,7 +317,7 @@ fn main() {
             pos: [0., 0.],
             theta: 0.,
         };
-        text.font.set_text("Hello, world!");
+        text.font.text = String::from("Hello, world!");
         text
     });
 

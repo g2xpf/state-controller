@@ -20,7 +20,7 @@ pub struct FontStyler<'a> {
     pub glyphs: Vec<PositionedGlyph<'a>>,
     font: Rc<Font<'a>>,
     cache_tex: Texture2d,
-    text: String,
+    pub text: String,
     wrap_bound: u32,
     font_size: f32,
 }
@@ -69,10 +69,6 @@ impl<'a> FontStyler<'a> {
     pub fn set_wrap_bound(&mut self, bound: u32) {
         let dpi_factor = self.display.gl_window().window().get_hidpi_factor();
         self.wrap_bound = bound * dpi_factor as u32;
-    }
-
-    pub fn set_text(&mut self, text: &str) {
-        self.text = text.to_owned();
     }
 
     pub fn set_font_size(&mut self, font_size: f32) {
