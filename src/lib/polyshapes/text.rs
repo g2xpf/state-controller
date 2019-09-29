@@ -44,8 +44,16 @@ impl PolyShape for Text {
                             tex_coord: uv.right_top,
                         },
                         Vertex {
+                            coord: position.right_top,
+                            tex_coord: uv.right_top,
+                        },
+                        Vertex {
                             coord: position.left_top,
                             tex_coord: uv.left_top,
+                        },
+                        Vertex {
+                            coord: position.left_bottom,
+                            tex_coord: uv.left_bottom,
                         },
                     ]
                 } else {
@@ -53,22 +61,7 @@ impl PolyShape for Text {
                 }
             })
             .collect();
-
-        let indices: Vec<_> = (0..glyphs.len() / 4)
-            .flat_map(|i| {
-                let padding = (i * 4) as u32;
-                vec![
-                    padding,
-                    padding + 1,
-                    padding + 2,
-                    padding,
-                    padding + 2,
-                    padding + 3,
-                ]
-            })
-            .collect();
-
-        (glyphs, indices)
+        (glyphs, vec![])
     }
 
     fn render_mode() -> index::PrimitiveType {
