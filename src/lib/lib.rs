@@ -1,6 +1,3 @@
-#[macro_use]
-extern crate glium;
-
 mod event;
 mod event_controller;
 mod shifter_mode;
@@ -25,6 +22,9 @@ pub mod primitive_shape {
     pub use super::polyshapes::Text;
     pub use super::shapes::{Circle, Rectangle, Texture};
 }
+
+#[macro_use]
+pub extern crate glium;
 
 pub use event::Event;
 pub use intermediate_state::IntermediateState;

@@ -2,8 +2,8 @@
 extern crate state_controller;
 extern crate image;
 
-use glium::{glutin, Frame};
 use state_controller::{
+    glium::{glutin, Frame},
     primitive_shape::{Circle, Rectangle, Text, Texture},
     utils::{EaseInOutSin, EaseOutBounce, FontStyler, Timer},
     Event, EventHandler, IntermediateState, Key, Parent, PolyShapeContainer, Receiver, Renderable,
