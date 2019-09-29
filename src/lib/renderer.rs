@@ -1,6 +1,6 @@
 use crate::polyshapes::PolyShape;
 use crate::shapes::Shape;
-use glium::{self, Display, IndexBuffer, Program, VertexBuffer};
+use glium::{self, index, Display, IndexBuffer, Program, VertexBuffer};
 use std::error::Error;
 use std::rc::Rc;
 
@@ -48,14 +48,24 @@ impl RawRenderContext {
     pub fn create_buffers<S>(
         &self,
         shape: &S,
-    ) -> Result<(VertexBuffer<S::Vertex>, IndexBuffer<u32>), Box<dyn Error>>
+    ) -> Result<
+        (
+            VertexBuffer<S::Vertex>,
+            Result<IndexBuffer<u32>, index::NoIndices>,
+        ),
+        Box<dyn Error>,
+    >
     where
         S: PolyShape,
     {
         // TODO: Buffering for faster construction
         let (vertices, indices) = shape.vertex_index();
         let vbo = VertexBuffer::new(&self.display, &vertices)?;
-        let ibo = IndexBuffer::new(&self.display, S::render_mode(), &indices)?;
+        let ibo = if indices.len() > 0 {
+            Ok(IndexBuffer::new(&self.display, S::render_mode(), &indices).unwrap())
+        } else {
+            Err(index::NoIndices(S::render_mode()).into())
+        };
         Ok((vbo, ibo))
     }
 }

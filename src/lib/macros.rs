@@ -81,20 +81,40 @@ macro_rules! impl_polyshape_container {
 
                 for shape in self.shapes.iter() {
                     let (vbo, ibo) = self.raw_render_context.create_buffers(shape).unwrap();
-                    frame
-                        .draw(
-                            &vbo,
-                            &ibo,
-                            &self.raw_render_context.program,
-                            &uniform! {
-                                $($($param: $param,)*)?
-                                $(
-                                    $id: shape.$id,
-                                )*
-                            },
-                            draw_parameters,
-                            )
-                        .unwrap();
+                    match ibo {
+                        Ok(ref index_buffer) => {
+                            frame
+                                .draw(
+                                    &vbo,
+                                    index_buffer,
+                                    &self.raw_render_context.program,
+                                    &uniform! {
+                                        $($($param: $param,)*)?
+                                            $(
+                                                $id: $value,
+                                                )*
+                                    },
+                                    draw_parameters,
+                                    )
+                                .unwrap();
+                        }
+                        Err(no_indices) => {
+                            frame
+                                .draw(
+                                    &vbo,
+                                    no_indices,
+                                    &self.raw_render_context.program,
+                                    &uniform! {
+                                        $($($param: $param,)*)?
+                                            $(
+                                                $id: $value,
+                                                )*
+                                    },
+                                    draw_parameters,
+                                    )
+                                .unwrap();
+                        }
+                    }
                 }
             }
         }
@@ -114,20 +134,40 @@ macro_rules! impl_polyshape_container {
 
                 for $shape in self.shapes.iter() {
                     let (vbo, ibo) = self.raw_render_context.create_buffers($shape).unwrap();
-                    frame
-                        .draw(
-                            &vbo,
-                            &ibo,
-                            &self.raw_render_context.program,
-                            &uniform! {
-                                $($($param: $param,)*)?
-                                $(
-                                    $id: $value,
-                                )*
-                            },
-                            draw_parameters,
-                            )
-                        .unwrap();
+                    match ibo {
+                        Ok(ref index_buffer) => {
+                            frame
+                                .draw(
+                                    &vbo,
+                                    index_buffer,
+                                    &self.raw_render_context.program,
+                                    &uniform! {
+                                        $($($param: $param,)*)?
+                                            $(
+                                                $id: $value,
+                                                )*
+                                    },
+                                    draw_parameters,
+                                    )
+                                .unwrap();
+                        }
+                        Err(no_indices) => {
+                            frame
+                                .draw(
+                                    &vbo,
+                                    no_indices,
+                                    &self.raw_render_context.program,
+                                    &uniform! {
+                                        $($($param: $param,)*)?
+                                            $(
+                                                $id: $value,
+                                                )*
+                                    },
+                                    draw_parameters,
+                                    )
+                                .unwrap();
+                        }
+                    }
                 }
             }
         }
