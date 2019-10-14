@@ -1,7 +1,8 @@
 use glium::{glutin, Frame};
 use state_controller::{
-    primitive_shape::Text, utils::FontStyler, Event, EventHandler, Key, PolyShapeContainer,
-    Renderable, Shifter, State, Updatable, World,
+    primitive_shape::Text,
+    utils::{Font, FontStyler},
+    Event, EventHandler, Key, PolyShapeContainer, Renderable, Shifter, State, Updatable, World,
 };
 
 struct InitState {
@@ -52,7 +53,7 @@ fn text_render_test() {
 
     let font_styler = FontStyler::new(
         &display,
-        include_bytes!("../static/GenRyuMinJP-Regular.ttf"),
+        Font::new(include_bytes!("../static/GenRyuMinJP-Regular.ttf")),
         window_dim,
     );
 

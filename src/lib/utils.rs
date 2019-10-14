@@ -2,6 +2,7 @@ mod easing;
 mod font;
 mod font_styler;
 mod lazy_cell;
+mod resource;
 mod timer;
 
 pub use easing::{
@@ -13,4 +14,5 @@ pub use easing::{
 pub use font::Font;
 pub use font_styler::FontStyler;
 pub use lazy_cell::LazyCell;
+pub use resource::Resource;
 pub use timer::Timer;
