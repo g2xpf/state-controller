@@ -1,6 +1,7 @@
 mod easing;
 mod font_styler;
 mod lazy_cell;
+mod resource;
 mod timer;
 
 pub use easing::{
@@ -9,6 +10,8 @@ pub use easing::{
     EaseInQuad, EaseInQuart, EaseInQuint, EaseInSin, EaseOutBack, EaseOutBounce, EaseOutCubic,
     EaseOutExpo, EaseOutQuad, EaseOutQuart, EaseOutQuint, EaseOutSin, Linear,
 };
+
 pub use font_styler::FontStyler;
 pub use lazy_cell::LazyCell;
+pub use resource::Resource;
 pub use timer::Timer;

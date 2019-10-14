@@ -1,4 +1,7 @@
-use std::cell::{Ref, RefCell, RefMut};
+use super::resource::Resource;
+use crate::error::ResourceUnloadedError;
+
+use std::cell::RefCell;
 use std::sync::{
     mpsc::{channel, Receiver, Sender},
     Arc, Mutex,
@@ -6,7 +9,7 @@ use std::sync::{
 use std::thread;
 
 pub struct LazyCell<T> {
-    resource: RefCell<Option<T>>,
+    pub resource: Resource<T>,
     loading: Arc<Mutex<bool>>,
     loaded: RefCell<bool>,
     txrx: (Sender<T>, Receiver<T>),
@@ -16,62 +19,62 @@ impl<T> LazyCell<T>
 where
     T: Send + 'static,
 {
-    pub fn load<F>(f: F) -> Self
+    pub fn new() -> Self {
+        LazyCell {
+            resource: Resource::empty(),
+            loading: Arc::new(Mutex::new(false)),
+            loaded: RefCell::new(false),
+            txrx: channel(),
+        }
+    }
+
+    pub fn load<F>(&mut self, loader: F)
     where
         F: Fn() -> T,
         F: Send + 'static,
     {
-        let loading = Arc::new(Mutex::new(false));
-        let txrx = channel();
-
-        let (loading_dup, tx) = (Arc::clone(&loading), txrx.0.clone());
+        let (loading_dup, tx) = (Arc::clone(&self.loading), self.txrx.0.clone());
         thread::spawn(move || {
-            let resource = f();
+            let resource = loader();
             let mut loading_dup = loading_dup.lock().unwrap();
             *loading_dup = true;
             tx.send(resource).unwrap();
         });
-
-        LazyCell {
-            resource: RefCell::new(None),
-            loading,
-            loaded: RefCell::new(false),
-            txrx,
-        }
     }
 
-    pub fn try_borrow(&self) -> Option<Ref<T>> {
+    pub fn poll(&mut self) -> bool {
         if *self.loaded.borrow() {
-            println!("return faster");
-            return Some(Ref::map(self.resource.borrow(), |r| r.as_ref().unwrap()));
+            return true;
         }
 
         if *self.loading.lock().unwrap() {
             *self.loaded.borrow_mut() = true;
             let resource = self.txrx.1.recv().unwrap();
-            *self.resource.borrow_mut() = Some(resource);
-            Some(Ref::map(self.resource.borrow(), |r| r.as_ref().unwrap()))
+            self.resource.set(resource);
+            true
         } else {
-            None
+            false
         }
     }
 
-    pub fn try_borrow_mut(&mut self) -> Option<RefMut<T>> {
-        if *self.loaded.borrow() {
-            println!("return faster");
-            return Some(RefMut::map(self.resource.borrow_mut(), |r| {
-                r.as_mut().unwrap()
-            }));
+    pub fn write(&self, target: &mut Resource<T>) {
+        if let Err(err) = self.try_write(target) {
+            panic!("{:?}", err);
         }
+    }
 
-        if *self.loading.lock().unwrap() {
-            *self.loaded.borrow_mut() = true;
-            let resource = self.txrx.1.recv().unwrap();
-            let mut borrow_mut = self.resource.borrow_mut();
-            *borrow_mut = Some(resource);
-            Some(RefMut::map(borrow_mut, |r| r.as_mut().unwrap()))
-        } else {
-            None
-        }
+    pub fn try_write(&self, target: &mut Resource<T>) -> Result<(), ResourceUnloadedError<T>> {
+        *target = self.resource.try_clone()?;
+        Ok(())
+    }
+
+    pub fn clone_resource(&self) -> Resource<T> {
+        self.try_clone_resource().unwrap_or_else(|err| {
+            panic!("{:?}", err);
+        })
+    }
+
+    pub fn try_clone_resource(&self) -> Result<Resource<T>, ResourceUnloadedError<T>> {
+        self.resource.try_clone()
     }
 }
