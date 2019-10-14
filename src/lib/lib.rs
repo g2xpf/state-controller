@@ -1,6 +1,7 @@
 #[macro_use]
 extern crate glium;
 
+pub mod error;
 mod event;
 mod event_controller;
 mod shifter_mode;
