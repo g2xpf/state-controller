@@ -6,6 +6,10 @@ use std::rc::Rc;
 pub struct Resource<T>(Option<Rc<RefCell<T>>>);
 
 impl<T> Resource<T> {
+    pub fn new(t: T) -> Self {
+        Resource(Some(Rc::new(RefCell::new(t))))
+    }
+
     pub fn empty() -> Self {
         Resource(None)
     }

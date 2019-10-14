@@ -5,7 +5,7 @@ extern crate image;
 use state_controller::{
     glium::{glutin, Frame},
     primitive_shape::{Circle, Rectangle, Text, Texture},
-    utils::{EaseInOutSin, EaseOutBounce, Font, FontStyler, Timer},
+    utils::{EaseInOutSin, EaseOutBounce, Font, FontStyler, Resource, Timer},
     Event, EventHandler, IntermediateState, Key, Parent, PolyShapeContainer, Receiver, Renderable,
     ShapeContainer, Shifter, State, Transition, TransitionFlow, Transitionable, Updatable, World,
 };
@@ -306,7 +306,9 @@ fn main() {
 
     let font_styler = FontStyler::new(
         &display,
-        Font::new(include_bytes!("../static/GenRyuMinJP-Regular.ttf")),
+        Resource::new(Font::new(include_bytes!(
+            "../static/GenRyuMinJP-Regular.ttf"
+        ))),
         (640., 640.).into(),
     );
 

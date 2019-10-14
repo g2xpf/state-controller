@@ -1,4 +1,4 @@
-use crate::utils::Font;
+use crate::utils::{Font, Resource};
 use glium::glutin::dpi::LogicalSize;
 use glium::texture::{ClientFormat, MipmapsOption, RawImage2d, Texture2d, UncompressedFloatFormat};
 use glium::uniforms::{MagnifySamplerFilter, Sampler};
@@ -18,7 +18,7 @@ pub struct FontStyler<'a> {
     display: Display,
     pub cache: Cache<'a>,
     pub glyphs: Vec<PositionedGlyph<'a>>,
-    font: Font<'a>,
+    font: Resource<Font<'a>>,
     cache_tex: Texture2d,
     pub text: String,
     wrap_bound: u32,
@@ -26,7 +26,7 @@ pub struct FontStyler<'a> {
 }
 
 impl<'a> FontStyler<'a> {
-    pub fn new(display: &Display, font: Font<'a>, logical_size: LogicalSize) -> Self {
+    pub fn new(display: &Display, font: Resource<Font<'a>>, logical_size: LogicalSize) -> Self {
         let dpi_factor = display.gl_window().window().get_hidpi_factor() as f64;
         let (inner_width, _) = display
             .gl_window()
@@ -76,39 +76,43 @@ impl<'a> FontStyler<'a> {
 
     pub fn layout_paragraph(&mut self) {
         use unicode_normalization::UnicodeNormalization;
-        let dpi_factor = self.display.gl_window().window().get_hidpi_factor();
-        let scale = Scale::uniform(self.font_size * dpi_factor as f32);
+
         let mut glyphs = Vec::new();
-        let v_metrics = self.font.v_metrics(scale);
-        let advance_height = v_metrics.ascent - v_metrics.descent + v_metrics.line_gap;
-        let mut caret = point(0.0, v_metrics.ascent);
-        let mut last_glyph_id = None;
-        for c in self.text.nfc() {
-            if c.is_control() {
-                match c {
-                    '\r' => {
-                        caret = point(0.0, caret.y + advance_height);
+        {
+            let font = self.font.borrow();
+            let dpi_factor = self.display.gl_window().window().get_hidpi_factor();
+            let scale = Scale::uniform(self.font_size * dpi_factor as f32);
+            let v_metrics = font.v_metrics(scale);
+            let advance_height = v_metrics.ascent - v_metrics.descent + v_metrics.line_gap;
+            let mut caret = point(0.0, v_metrics.ascent);
+            let mut last_glyph_id = None;
+            for c in self.text.nfc() {
+                if c.is_control() {
+                    match c {
+                        '\r' => {
+                            caret = point(0.0, caret.y + advance_height);
+                        }
+                        '\n' => {}
+                        _ => {}
                     }
-                    '\n' => {}
-                    _ => {}
+                    continue;
                 }
-                continue;
-            }
-            let base_glyph = self.font.glyph(c);
-            if let Some(id) = last_glyph_id.take() {
-                caret.x += self.font.pair_kerning(scale, id, base_glyph.id());
-            }
-            last_glyph_id = Some(base_glyph.id());
-            let mut glyph = base_glyph.scaled(scale).positioned(caret);
-            if let Some(bb) = glyph.pixel_bounding_box() {
-                if bb.max.x > self.wrap_bound as i32 {
-                    caret = point(0.0, caret.y + advance_height);
-                    glyph.set_position(caret);
-                    last_glyph_id = None;
+                let base_glyph = font.glyph(c);
+                if let Some(id) = last_glyph_id.take() {
+                    caret.x += font.pair_kerning(scale, id, base_glyph.id());
                 }
+                last_glyph_id = Some(base_glyph.id());
+                let mut glyph = base_glyph.scaled(scale).positioned(caret);
+                if let Some(bb) = glyph.pixel_bounding_box() {
+                    if bb.max.x > self.wrap_bound as i32 {
+                        caret = point(0.0, caret.y + advance_height);
+                        glyph.set_position(caret);
+                        last_glyph_id = None;
+                    }
+                }
+                caret.x += glyph.unpositioned().h_metrics().advance_width;
+                glyphs.push(glyph);
             }
-            caret.x += glyph.unpositioned().h_metrics().advance_width;
-            glyphs.push(glyph);
         }
         glyphs
             .iter()
