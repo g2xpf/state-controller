@@ -1,4 +1,5 @@
 mod easing;
+mod font;
 mod font_styler;
 mod lazy_cell;
 mod timer;
@@ -9,6 +10,7 @@ pub use easing::{
     EaseInQuad, EaseInQuart, EaseInQuint, EaseInSin, EaseOutBack, EaseOutBounce, EaseOutCubic,
     EaseOutExpo, EaseOutQuad, EaseOutQuart, EaseOutQuint, EaseOutSin, Linear,
 };
+pub use font::Font;
 pub use font_styler::FontStyler;
 pub use lazy_cell::LazyCell;
 pub use timer::Timer;

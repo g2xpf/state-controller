@@ -1,11 +1,11 @@
+use crate::utils::Font;
 use glium::glutin::dpi::LogicalSize;
 use glium::texture::{ClientFormat, MipmapsOption, RawImage2d, Texture2d, UncompressedFloatFormat};
 use glium::uniforms::{MagnifySamplerFilter, Sampler};
 use glium::Display;
 use rusttype::gpu_cache::Cache;
-use rusttype::{point, Font, PositionedGlyph, Scale};
+use rusttype::{point, PositionedGlyph, Scale};
 use std::borrow::Cow;
-use std::rc::Rc;
 
 pub struct RectCoord {
     pub left_bottom: [f32; 2],
@@ -18,7 +18,7 @@ pub struct FontStyler<'a> {
     display: Display,
     pub cache: Cache<'a>,
     pub glyphs: Vec<PositionedGlyph<'a>>,
-    font: Rc<Font<'a>>,
+    font: Font<'a>,
     cache_tex: Texture2d,
     pub text: String,
     wrap_bound: u32,
@@ -26,8 +26,7 @@ pub struct FontStyler<'a> {
 }
 
 impl<'a> FontStyler<'a> {
-    pub fn new(display: &Display, font: &'a [u8], logical_size: LogicalSize) -> Self {
-        let font = Font::from_bytes(font).unwrap();
+    pub fn new(display: &Display, font: Font<'a>, logical_size: LogicalSize) -> Self {
         let dpi_factor = display.gl_window().window().get_hidpi_factor() as f64;
         let (inner_width, _) = display
             .gl_window()
@@ -58,7 +57,7 @@ impl<'a> FontStyler<'a> {
                 MipmapsOption::NoMipmap,
             )
             .unwrap(),
-            font: Rc::new(font),
+            font,
             glyphs: Vec::new(),
             text: String::from(""),
             wrap_bound: inner_width,
