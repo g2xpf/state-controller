@@ -1,4 +1,5 @@
 use crate::{
+    event::Event,
     parent::Parent,
     receiver::Receiver,
     traits::{EventHandler, Renderable, Updatable},
@@ -109,6 +110,14 @@ pub trait State: Updatable + Renderable + EventHandler + Any + 'static {
             .unwrap_or_else(|| panic!("Tried to call the unregistered parent"))
             .borrow_mut();
         RefMut::map(parent, |s| s.downcast_mut::<P>().unwrap())
+    }
+
+    fn parent_handle<P>(&self, shifter: &Shifter, event: &Event)
+    where
+        Self: Sized,
+        P: Parent<Self>,
+    {
+        self.parent_ref::<P>(shifter).handle_by_ref(event);
     }
 }
 

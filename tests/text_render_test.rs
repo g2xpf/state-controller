@@ -17,7 +17,7 @@ impl Renderable for InitState {
 }
 
 impl EventHandler for InitState {
-    fn handle(&mut self, event: &Event) {
+    fn handle(&mut self, _shifter: &Shifter, event: &Event) {
         let font = &mut self.text_container[0].font;
         for c in event.text().chars() {
             if c as u8 == 0x8 {

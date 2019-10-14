@@ -11,7 +11,8 @@ pub trait Renderable {
 }
 
 pub trait EventHandler {
-    fn handle(&mut self, _event: &Event) {}
+    fn handle(&mut self, _shifter: &Shifter, _event: &Event) {}
+    fn handle_by_ref(&self, _event: &Event) {}
 }
 
 pub struct TransitionEvidence;

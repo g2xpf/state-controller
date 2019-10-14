@@ -65,7 +65,9 @@ impl StateController<Running> {
         {
             intermediate_state.handle(event);
         } else {
-            self.current_state.borrow_mut().handle(&event);
+            self.current_state
+                .borrow_mut()
+                .handle(&self.state_shifter, &event);
         }
     }
 

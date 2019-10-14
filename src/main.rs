@@ -46,7 +46,7 @@ impl Updatable for InitState {
 }
 
 impl EventHandler for InitState {
-    fn handle(&mut self, event: &Event) {
+    fn handle(&mut self, _shifter: &Shifter, event: &Event) {
         if event.window.close_requested || event.key(Key::Escape).is_pressed() {
             std::process::exit(0)
         }
@@ -116,7 +116,7 @@ impl Updatable for SecondState {
 }
 
 impl EventHandler for SecondState {
-    fn handle(&mut self, event: &Event) {
+    fn handle(&mut self, _shifter: &Shifter, event: &Event) {
         if event.window.close_requested || event.key(Key::Escape).is_pressed() {
             std::process::exit(0)
         }
