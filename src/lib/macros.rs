@@ -196,11 +196,34 @@ macro_rules! implement_render {
                                        $id: shape.$id,
                                    )*
                            },
-                           draw_parameters);
+                           draw_parameters).unwrap();
             }
         }
     };
-    ($Context:ty; |$shape:ident| { $($id: ident: $value: expr),* } $(; $($param:ident: $type:ty),*)?) => {};
+    ($Context:ty; |$shape:ident| { $($id: ident: $value: expr),* } $(; $($param:ident: $type:ty),*)?) => {
+        impl $Context {
+
+            pub fn render<'a>(&self,
+                      frame: &mut glium::Frame,
+                      $shape: &<Self as RenderContext>::Target,
+                      draw_parameters: &glium::DrawParameters<'a>
+                      $($(,$param: $type)*)?) {
+                use glium::Surface;
+
+                let vertex_buffer = self.vertex($shape);
+                let index_buffer = self.index($shape);
+                let program = self.program($shape);
+                frame.draw(vertex_buffer, index_buffer, program,
+                           &uniform! {
+                               $($($param: $param,)*)?
+                                   $(
+                                       $id: $value,
+                                   )*
+                           },
+                           draw_parameters).unwrap();
+            }
+        }
+    };
 }
 
 #[macro_export]

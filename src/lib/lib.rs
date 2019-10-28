@@ -23,6 +23,7 @@ pub mod primitive_shape {
     // pub use super::polyshapes::Text;
     pub use super::shapes::{Circle, CircleContext};
     pub use super::shapes::{Rectangle, RectangleContext};
+    pub use super::shapes::{Texture, TextureContext};
 }
 
 #[macro_use]

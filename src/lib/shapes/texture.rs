@@ -1,10 +1,22 @@
 use super::Shape;
-use glium::{index::PrimitiveType, texture};
+use crate::RenderContext;
+use glium::{index::PrimitiveType, texture, Display, IndexBuffer, Program, VertexBuffer};
 use std::ops::Deref;
 use std::rc::Rc;
 
 const VSRC: &'static str = include_str!("texture.vert");
 const FSRC: &'static str = include_str!("texture.frag");
+
+const VERTICES: &'_ [Vertex] = &[
+    Vertex {
+        coord: [-1.0, -1.0],
+    },
+    Vertex { coord: [1.0, -1.0] },
+    Vertex { coord: [1.0, 1.0] },
+    Vertex { coord: [-1.0, 1.0] },
+];
+
+const INDICES: &'_ [u32] = &[0, 1, 2, 3];
 
 #[derive(Debug, Clone)]
 pub struct Texture {
@@ -15,6 +27,22 @@ pub struct Texture {
     pub tex: Rc<texture::Texture2d>,
 }
 
+pub struct TextureContext {
+    program: Program,
+    vertex_buffer: VertexBuffer<Vertex>,
+    index_buffer: IndexBuffer<u32>,
+}
+
+impl TextureContext {
+    pub fn new(display: &Display) -> Self {
+        TextureContext {
+            program: Program::from_source(display, VSRC, FSRC, None).unwrap(),
+            vertex_buffer: VertexBuffer::new(display, VERTICES).unwrap(),
+            index_buffer: IndexBuffer::new(display, PrimitiveType::TriangleFan, INDICES).unwrap(),
+        }
+    }
+}
+
 #[derive(Copy, Clone)]
 pub struct Vertex {
     coord: [f32; 2],
@@ -22,38 +50,31 @@ pub struct Vertex {
 
 implement_vertex!(Vertex, coord);
 
-impl Shape for Texture {
-    type Vertex = Vertex;
+impl<'a> Shape<'a> for Texture {
+    type Vertex = &'a VertexBuffer<Vertex>;
+    type Index = &'a IndexBuffer<u32>;
+}
 
-    fn vertex() -> Vec<Self::Vertex> {
-        vec![
-            Vertex {
-                coord: [-1.0, -1.0],
-            },
-            Vertex { coord: [-1.0, 1.0] },
-            Vertex { coord: [1.0, 1.0] },
-            Vertex { coord: [1.0, -1.0] },
-        ]
+impl<'a> RenderContext<'a> for TextureContext {
+    type Target = Texture;
+
+    fn vertex<'b: 'a, 'c: 'a>(
+        &'b self,
+        _: &'c Self::Target,
+    ) -> <Self::Target as Shape<'a>>::Vertex {
+        &self.vertex_buffer
     }
 
-    fn index() -> Vec<u32> {
-        (0..=3).collect()
+    fn index<'b: 'a, 'c: 'a>(&'b self, _: &'c Self::Target) -> <Self::Target as Shape<'a>>::Index {
+        &self.index_buffer
     }
 
-    fn render_mode() -> PrimitiveType {
-        PrimitiveType::TriangleFan
-    }
-
-    fn vertex_src() -> &'static str {
-        VSRC
-    }
-
-    fn fragment_src() -> &'static str {
-        FSRC
+    fn program(&self, _: &Self::Target) -> &Program {
+        &self.program
     }
 }
 
-impl_shape_container!(Texture; |shape| {
+implement_render!(TextureContext; |shape| {
     pos: shape.pos,
     width: shape.width,
     height: shape.height,

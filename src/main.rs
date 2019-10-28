@@ -1,9 +1,12 @@
 extern crate image;
+#[macro_use(texture)]
 extern crate state_controller;
 
 use state_controller::{
     glium::{glutin, Frame},
-    primitive_shape::{Circle, CircleContext, Rectangle, RectangleContext},
+    primitive_shape::{
+        Circle, CircleContext, Rectangle, RectangleContext, Texture, TextureContext,
+    },
     utils::{EaseInOutSin, EaseOutBounce, Timer},
     Event, EventHandler, IntermediateState, Key, Parent, Receiver, Renderable, Shifter, State,
     Transition, TransitionFlow, Transitionable, Updatable, World,
@@ -23,14 +26,17 @@ struct InitState {
     counter: u64,
     rectangle: Rectangle,
     rectangle_context: RectangleContext,
+    texture: Texture,
+    texture_context: TextureContext,
 }
 
 impl Renderable for InitState {
     fn render(&self, shifter: &Shifter, frame: &mut Frame) {
-        // let parent = self.parent_ref::<Global>(shifter);
-
         self.rectangle_context
-            .render(frame, &self.rectangle, &Default::default(), (0., 0.));
+            .render(frame, &self.rectangle, &Default::default(), (0., -0.5));
+
+        self.texture_context
+            .render(frame, &self.texture, &Default::default(), (0., 0.5));
     }
 }
 
@@ -63,7 +69,6 @@ struct SecondState {
 impl Renderable for SecondState {
     fn render(&self, shifter: &Shifter, frame: &mut Frame) {
         let parent = self.parent_ref::<Global>(shifter);
-        println!("circle is rendering");
         self.circle_context.render(
             frame,
             &self.circle,
@@ -217,15 +222,27 @@ fn main() {
         color: [0.0, 0.4, 0.4],
     };
 
-    let init_state: InitState = InitState {
+    let texture = Texture {
+        pos: [0.0, 0.0],
+        width: 0.3,
+        height: 0.3,
+        angle: 0.0,
+        tex: texture!(&display, "../static/PNG.png", image::PNG),
+    };
+
+    let texture_context = TextureContext::new(&display);
+
+    let init_state = InitState {
         counter: 0,
         rectangle,
         rectangle_context,
+        texture,
+        texture_context,
     };
 
     let circle = Circle {
         pos: [0.0, 0.0],
-        r: 0.5,
+        r: 0.25,
         color: [0.0, 0.4, 0.4],
     };
 
