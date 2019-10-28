@@ -6,9 +6,9 @@ mod shifter_mode;
 pub mod macros;
 mod intermediate_state;
 mod parent;
-mod polyshapes;
+// mod polyshapes;
 mod receiver;
-mod renderer;
+mod render_context;
 mod shapes;
 mod state;
 mod state_controller;
@@ -20,8 +20,9 @@ pub mod utils;
 mod world;
 
 pub mod primitive_shape {
-    pub use super::polyshapes::Text;
-    pub use super::shapes::{Circle, Rectangle, Texture};
+    // pub use super::polyshapes::Text;
+    pub use super::shapes::{Circle, CircleContext};
+    pub use super::shapes::{Rectangle, RectangleContext};
 }
 
 #[macro_use]
@@ -30,10 +31,10 @@ pub extern crate glium;
 pub use event::Event;
 pub use intermediate_state::IntermediateState;
 pub use parent::Parent;
-pub use polyshapes::{PolyShape, PolyShapeContainer};
+// pub use polyshapes::{PolyShape, PolyShapeContainer};
 pub use receiver::Receiver;
-pub use renderer::RenderContext;
-pub use shapes::{Shape, ShapeContainer};
+pub use render_context::RenderContext;
+pub use shapes::Shape;
 pub use state::State;
 pub use state_transition::Transition;
 pub use traits::{EventHandler, Renderable, Transitionable, Updatable};

@@ -1,13 +1,12 @@
-#[macro_use]
-extern crate state_controller;
 extern crate image;
+extern crate state_controller;
 
 use state_controller::{
     glium::{glutin, Frame},
-    primitive_shape::{Circle, Rectangle, Text, Texture},
-    utils::{EaseInOutSin, EaseOutBounce, Font, FontStyler, Resource, Timer},
-    Event, EventHandler, IntermediateState, Key, Parent, PolyShapeContainer, Receiver, Renderable,
-    ShapeContainer, Shifter, State, Transition, TransitionFlow, Transitionable, Updatable, World,
+    primitive_shape::{Circle, CircleContext, Rectangle, RectangleContext},
+    utils::{EaseInOutSin, EaseOutBounce, Timer},
+    Event, EventHandler, IntermediateState, Key, Parent, Receiver, Renderable, Shifter, State,
+    Transition, TransitionFlow, Transitionable, Updatable, World,
 };
 
 struct Global {
@@ -22,22 +21,22 @@ impl State for Global {}
 
 struct InitState {
     counter: u64,
-    rectangle_container: ShapeContainer<Rectangle>,
-    texture_container: ShapeContainer<Texture>,
+    rectangle: Rectangle,
+    rectangle_context: RectangleContext,
 }
 
 impl Renderable for InitState {
-    fn render(&self, _shifter: &Shifter, frame: &mut Frame) {
-        self.rectangle_container
-            .render(frame, &Default::default(), (0., 0.));
-        self.texture_container
-            .render(frame, &Default::default(), (0., 0.));
+    fn render(&self, shifter: &Shifter, frame: &mut Frame) {
+        // let parent = self.parent_ref::<Global>(shifter);
+
+        self.rectangle_context
+            .render(frame, &self.rectangle, &Default::default(), (0., 0.));
     }
 }
 
 impl Updatable for InitState {
     fn update(&mut self, shifter: &mut Shifter) {
-        if self.counter >= 1000 {
+        if self.counter >= 40 {
             self.counter = 0;
             self.shift::<SecondState>(shifter);
         }
@@ -50,30 +49,6 @@ impl EventHandler for InitState {
         if event.window.close_requested || event.key(Key::Escape).is_pressed() {
             std::process::exit(0)
         }
-        for rectangle in self.rectangle_container.iter_mut() {
-            let dr = 0.03;
-            if event.key(Key::Right).is_pressed() {
-                rectangle.pos[0] += dr;
-            }
-            if event.key(Key::Left).is_pressed() {
-                rectangle.pos[0] -= dr;
-            }
-            if event.key(Key::Up).is_pressed() {
-                rectangle.pos[1] += dr;
-            }
-            if event.key(Key::Down).is_pressed() {
-                rectangle.pos[1] -= dr;
-            }
-            if event.key(Key::L).is_pressed() {
-                rectangle.angle -= dr;
-            }
-            if event.key(Key::H).is_pressed() {
-                rectangle.angle += dr;
-            }
-            if event.key(Key::K).is_pressed() {
-                self.counter = 10000;
-            }
-        }
     }
 }
 
@@ -81,37 +56,31 @@ impl State for InitState {}
 
 struct SecondState {
     counter: u64,
-    circle_container: ShapeContainer<Circle>,
-    text_container: PolyShapeContainer<Text>,
+    circle: Circle,
+    circle_context: CircleContext,
 }
 
 impl Renderable for SecondState {
     fn render(&self, shifter: &Shifter, frame: &mut Frame) {
         let parent = self.parent_ref::<Global>(shifter);
-        self.circle_container
-            .render(frame, &Default::default(), (0., 0.), parent.resolution);
-        self.text_container.render(
+        println!("circle is rendering");
+        self.circle_context.render(
             frame,
-            &glium::DrawParameters {
-                // blend: glium::Blend::alpha_blending(),
-                ..Default::default()
-            },
-            (0.5, 0.5, 0.5),
+            &self.circle,
+            &Default::default(),
             (0., 0.),
+            parent.resolution,
         );
     }
 }
 
 impl Updatable for SecondState {
     fn update(&mut self, shifter: &mut Shifter) {
-        if self.counter >= 1000 {
+        if self.counter >= 40 {
             self.counter = 0;
             self.shift::<InitState>(shifter);
         }
         self.counter += 1;
-
-        self.text_container[0].theta += 0.0;
-        self.text_container[0].font.layout_paragraph();
     }
 }
 
@@ -120,35 +89,22 @@ impl EventHandler for SecondState {
         if event.window.close_requested || event.key(Key::Escape).is_pressed() {
             std::process::exit(0)
         }
-        for circle in self.circle_container.iter_mut() {
-            let dr = 0.03;
-            if event.key(Key::A).is_pressed() {
-                self.text_container[0].pos[0] -= dr;
-            }
-            if event.key(Key::D).is_pressed() {
-                self.text_container[0].pos[0] += dr;
-            }
-            if event.key(Key::W).is_pressed() {
-                self.text_container[0].pos[1] += dr;
-            }
-            if event.key(Key::S).is_pressed() {
-                self.text_container[0].pos[1] -= dr;
-            }
-            if event.key(Key::Right).is_pressed() {
-                circle.pos[0] += dr;
-            }
-            if event.key(Key::Left).is_pressed() {
-                circle.pos[0] -= dr;
-            }
-            if event.key(Key::Up).is_pressed() {
-                circle.pos[1] += dr;
-            }
-            if event.key(Key::Down).is_pressed() {
-                circle.pos[1] -= dr;
-            }
-            if event.key(Key::J).is_pressed() {
-                self.counter = 10000;
-            }
+        let circle = &mut self.circle;
+        let dr = 0.03;
+        if event.key(Key::Right).is_pressed() {
+            circle.pos[0] += dr;
+        }
+        if event.key(Key::Left).is_pressed() {
+            circle.pos[0] -= dr;
+        }
+        if event.key(Key::Up).is_pressed() {
+            circle.pos[1] += dr;
+        }
+        if event.key(Key::Down).is_pressed() {
+            circle.pos[1] -= dr;
+        }
+        if event.key(Key::J).is_pressed() {
+            self.counter = 10000;
         }
     }
 }
@@ -198,16 +154,6 @@ impl IntermediateState for InitToSecond {
         match self.timer.get_ratio_easing::<EaseInOutSin>() {
             Some(ratio) => {
                 let ratio = ratio as f32;
-                from.rectangle_container
-                    .render(frame, &Default::default(), (ratio * 2., 0.));
-                from.texture_container
-                    .render(frame, &Default::default(), (ratio * 2., 0.));
-                to.circle_container.render(
-                    frame,
-                    &Default::default(),
-                    (ratio * 2. - 2.0, 0.),
-                    parent.resolution,
-                );
             }
             _ => {}
         }
@@ -245,16 +191,6 @@ impl IntermediateState for SecondToInit {
         match self.timer.get_ratio_easing::<EaseOutBounce>() {
             Some(ratio) => {
                 let ratio = ratio as f32;
-                to.rectangle_container
-                    .render(frame, &Default::default(), ((1. - ratio) * 2., 0.));
-                to.texture_container
-                    .render(frame, &Default::default(), ((1. - ratio) * 2., 0.));
-                from.circle_container.render(
-                    frame,
-                    &Default::default(),
-                    ((1. - ratio) * 2. - 2.0, 0.),
-                    parent.resolution,
-                );
             }
             _ => {}
         }
@@ -272,61 +208,33 @@ fn main() {
     let ctx = glutin::ContextBuilder::new().with_vsync(true);
     let display = glium::Display::new(window, ctx, &events_loop).unwrap();
 
-    let mut rectangle_container = ShapeContainer::<Rectangle>::new(&display);
-    rectangle_container.push(Rectangle {
-        pos: [-0.3, 0.0],
-        width: 0.2,
-        height: 0.5,
-        color: [0.1, 0.2, 0.1],
-        angle: std::f32::consts::PI / 3.0,
-    });
-
-    let mut texture_container = ShapeContainer::<Texture>::new(&display);
-
-    texture_container.push(Texture {
-        pos: [0.3, 0.0],
-        width: 0.4,
-        height: 0.4,
-        angle: std::f32::consts::PI / 3.0,
-        tex: texture!(&display, "../static/PNG.png", image::PNG),
-    });
+    let rectangle_context = RectangleContext::new(&display);
+    let rectangle = Rectangle {
+        pos: [0.0, 0.0],
+        width: 0.3,
+        height: 0.3,
+        angle: 0.0,
+        color: [0.0, 0.4, 0.4],
+    };
 
     let init_state: InitState = InitState {
         counter: 0,
-        rectangle_container,
-        texture_container,
+        rectangle,
+        rectangle_context,
     };
 
-    let mut circle_container = ShapeContainer::<Circle>::new(&display);
-    circle_container.push(Circle {
+    let circle = Circle {
         pos: [0.0, 0.0],
         r: 0.5,
         color: [0.0, 0.4, 0.4],
-    });
+    };
 
-    let font_styler = FontStyler::new(
-        &display,
-        Resource::new(Font::new(include_bytes!(
-            "../static/GenRyuMinJP-Regular.ttf"
-        ))),
-        (640., 640.).into(),
-    );
-
-    let mut text_container = PolyShapeContainer::<Text>::new(&display);
-    text_container.push({
-        let mut text = Text {
-            font: font_styler,
-            pos: [0., 0.],
-            theta: 0.,
-        };
-        text.font.text = String::from("Hello, world!");
-        text
-    });
+    let circle_context = CircleContext::new(&display);
 
     let second_state: SecondState = SecondState {
         counter: 0,
-        circle_container,
-        text_container,
+        circle,
+        circle_context,
     };
 
     let global = Global {

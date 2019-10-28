@@ -1,6 +1,20 @@
+use crate::RenderContext;
+use glium::{index::PrimitiveType, Display, IndexBuffer, Program, VertexBuffer};
+
 use super::Shape;
 const VSRC: &'static str = include_str!("rectangle.vert");
 const FSRC: &'static str = include_str!("rectangle.frag");
+
+const VERTICES: &'_ [Vertex] = &[
+    Vertex {
+        coord: [-1.0, -1.0],
+    },
+    Vertex { coord: [1.0, -1.0] },
+    Vertex { coord: [1.0, 1.0] },
+    Vertex { coord: [-1.0, 1.0] },
+];
+
+const INDICES: &'_ [u32] = &[0, 1, 2, 3];
 
 #[derive(Debug, Clone, Copy)]
 pub struct Rectangle {
@@ -11,6 +25,22 @@ pub struct Rectangle {
     pub angle: f32,
 }
 
+pub struct RectangleContext {
+    program: Program,
+    vertex_buffer: VertexBuffer<Vertex>,
+    index_buffer: IndexBuffer<u32>,
+}
+
+impl RectangleContext {
+    pub fn new(display: &Display) -> Self {
+        RectangleContext {
+            program: Program::from_source(display, VSRC, FSRC, None).unwrap(),
+            vertex_buffer: VertexBuffer::new(display, VERTICES).unwrap(),
+            index_buffer: IndexBuffer::new(display, PrimitiveType::TriangleFan, INDICES).unwrap(),
+        }
+    }
+}
+
 #[derive(Copy, Clone)]
 pub struct Vertex {
     coord: [f32; 2],
@@ -18,31 +48,28 @@ pub struct Vertex {
 
 implement_vertex!(Vertex, coord);
 
-impl Shape for Rectangle {
-    type Vertex = Vertex;
+impl<'a> Shape<'a> for Rectangle {
+    type Vertex = &'a VertexBuffer<Vertex>;
+    type Index = &'a IndexBuffer<u32>;
+}
 
-    fn vertex() -> Vec<Self::Vertex> {
-        vec![
-            Vertex {
-                coord: [-1.0, -1.0],
-            },
-            Vertex { coord: [-1.0, 1.0] },
-            Vertex { coord: [1.0, -1.0] },
-            Vertex { coord: [1.0, 1.0] },
-        ]
+impl<'a> RenderContext<'a> for RectangleContext {
+    type Target = Rectangle;
+
+    fn vertex<'b: 'a, 'c: 'a>(
+        &'b self,
+        _: &'c Self::Target,
+    ) -> <Self::Target as Shape<'a>>::Vertex {
+        &self.vertex_buffer
     }
 
-    fn index() -> Vec<u32> {
-        vec![0, 1, 2, 1, 2, 3]
+    fn index<'b: 'a, 'c: 'a>(&'b self, _: &'c Self::Target) -> <Self::Target as Shape<'a>>::Index {
+        &self.index_buffer
     }
 
-    fn vertex_src() -> &'static str {
-        VSRC
-    }
-
-    fn fragment_src() -> &'static str {
-        FSRC
+    fn program(&self, _: &Self::Target) -> &Program {
+        &self.program
     }
 }
 
-impl_shape_container!(Rectangle; pos, width, height, color, angle; camera_pos: (f32, f32));
+implement_render!(RectangleContext; pos, width, height, color, angle; camera_pos: (f32, f32));

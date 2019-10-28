@@ -1,73 +1,15 @@
-use crate::renderer::RenderContext;
-use glium::{index, Vertex};
-use std::{
-    ops::{Deref, DerefMut},
-    rc::Rc,
-};
+use glium::{index::IndicesSource, vertex::VerticesSource};
 
 mod circle;
 mod rectangle;
-mod texture;
+// mod texture;
 
-pub use circle::Circle;
-pub use rectangle::Rectangle;
-pub use texture::Texture;
+pub use circle::{Circle, CircleContext};
+pub use rectangle::{Rectangle, RectangleContext};
+// pub use rectangle::Rectangle;
+// pub use texture::Texture;
 
-pub trait Shape {
-    type Vertex: Vertex;
-
-    fn vertex() -> Vec<Self::Vertex>;
-    fn index() -> Vec<u32>;
-    fn render_mode() -> index::PrimitiveType {
-        index::PrimitiveType::TrianglesList
-    }
-
-    fn vertex_src() -> &'static str;
-    fn fragment_src() -> &'static str;
-}
-
-pub struct ShapeContainer<S>
-where
-    S: Shape,
-{
-    pub shapes: Vec<S>,
-    pub render_context: Rc<RenderContext<S>>,
-}
-
-impl<S> ShapeContainer<S>
-where
-    S: Shape,
-{
-    pub fn new<'a>(display: &'a glium::Display) -> Self {
-        ShapeContainer {
-            shapes: Vec::new(),
-            render_context: Rc::new(RenderContext::<S>::new(display)),
-        }
-    }
-
-    pub fn clone_context<'a>(&self) -> Self {
-        ShapeContainer {
-            shapes: Vec::new(),
-            render_context: Rc::clone(&self.render_context),
-        }
-    }
-}
-
-impl<S> Deref for ShapeContainer<S>
-where
-    S: Shape,
-{
-    type Target = Vec<S>;
-    fn deref(&self) -> &Self::Target {
-        &self.shapes
-    }
-}
-
-impl<S> DerefMut for ShapeContainer<S>
-where
-    S: Shape,
-{
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.shapes
-    }
+pub trait Shape<'a> {
+    type Vertex: Into<VerticesSource<'a>>;
+    type Index: Into<IndicesSource<'a>>;
 }

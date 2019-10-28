@@ -1,13 +1,44 @@
 use super::Shape;
-use glium::index::PrimitiveType;
+use crate::render_context::RenderContext;
+use glium::{
+    index::{IndexBuffer, PrimitiveType},
+    Display, Program, VertexBuffer,
+};
 
 const VSRC: &'static str = include_str!("circle.vert");
 const FSRC: &'static str = include_str!("circle.frag");
+
+const VERTICES: &'_ [Vertex; 4] = &[
+    Vertex { coord: [-1., -1.] },
+    Vertex { coord: [1., -1.] },
+    Vertex { coord: [1., 1.] },
+    Vertex { coord: [-1., 1.] },
+];
+
+const INDICES: &'_ [u32; 4] = &[0u32, 1, 2, 3];
 
 pub struct Circle {
     pub pos: [f32; 2],
     pub r: f32,
     pub color: [f32; 3],
+}
+
+pub struct CircleContext {
+    program: Program,
+    vertex_buffer: VertexBuffer<Vertex>,
+    index_buffer: IndexBuffer<u32>,
+}
+
+impl CircleContext {
+    pub fn new(display: &Display) -> Self {
+        let vertex_buffer = VertexBuffer::new(display, VERTICES).unwrap();
+        let index_buffer = IndexBuffer::new(display, PrimitiveType::TriangleFan, INDICES).unwrap();
+        CircleContext {
+            program: Program::from_source(display, VSRC, FSRC, None).unwrap(),
+            vertex_buffer,
+            index_buffer,
+        }
+    }
 }
 
 #[derive(Copy, Clone)]
@@ -17,35 +48,28 @@ pub struct Vertex {
 
 implement_vertex!(Vertex, coord);
 
-impl Shape for Circle {
-    type Vertex = Vertex;
+impl<'a> Shape<'a> for Circle {
+    type Vertex = &'a VertexBuffer<Vertex>;
+    type Index = &'a IndexBuffer<u32>;
+}
 
-    fn vertex() -> Vec<Self::Vertex> {
-        vec![
-            Vertex {
-                coord: [-1.0, -1.0],
-            },
-            Vertex { coord: [1.0, -1.0] },
-            Vertex { coord: [1.0, 1.0] },
-            Vertex { coord: [-1.0, 1.0] },
-        ]
+impl<'a> RenderContext<'a> for CircleContext {
+    type Target = Circle;
+
+    fn vertex<'b: 'a, 'c: 'a>(
+        &'b self,
+        _: &'c Self::Target,
+    ) -> <Self::Target as Shape<'a>>::Vertex {
+        &self.vertex_buffer
     }
 
-    fn index() -> Vec<u32> {
-        (0..4).collect()
+    fn index<'b: 'a, 'c: 'a>(&'b self, _: &'c Self::Target) -> <Self::Target as Shape<'a>>::Index {
+        &self.index_buffer
     }
 
-    fn render_mode() -> PrimitiveType {
-        PrimitiveType::TriangleFan
-    }
-
-    fn vertex_src() -> &'static str {
-        VSRC
-    }
-
-    fn fragment_src() -> &'static str {
-        FSRC
+    fn program(&self, _: &Self::Target) -> &Program {
+        &self.program
     }
 }
 
-impl_shape_container!(Circle; pos, r, color; camera_pos: (f32, f32), iResolution: (i32, i32));
+implement_render!(CircleContext; pos, r, color; camera_pos: (f32, f32), iResolution: (i32, i32));

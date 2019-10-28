@@ -175,6 +175,35 @@ macro_rules! impl_polyshape_container {
 }
 
 #[macro_export]
+macro_rules! implement_render {
+    ($Context:ty; $($id:ident),* $(; $($param:ident: $type:ty),* )?) => {
+        impl $Context {
+
+            pub fn render<'a>(&self,
+                      frame: &mut glium::Frame,
+                      shape: &<Self as RenderContext>::Target,
+                      draw_parameters: &glium::DrawParameters<'a>
+                      $($(,$param: $type)*)?) {
+                use glium::Surface;
+
+                let vertex_buffer = self.vertex(shape);
+                let index_buffer = self.index(shape);
+                let program = self.program(shape);
+                frame.draw(vertex_buffer, index_buffer, program,
+                           &uniform! {
+                               $($($param: $param,)*)?
+                                   $(
+                                       $id: shape.$id,
+                                   )*
+                           },
+                           draw_parameters);
+            }
+        }
+    };
+    ($Context:ty; |$shape:ident| { $($id: ident: $value: expr),* } $(; $($param:ident: $type:ty),*)?) => {};
+}
+
+#[macro_export]
 macro_rules! texture {
     ($display: expr, $image_path: expr, $image_format: expr) => {{
         use glium;
