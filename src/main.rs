@@ -209,6 +209,12 @@ impl IntermediateState for InitToSecond {
                     (ratio * 2. - 2.0, 0.),
                     parent.resolution,
                 );
+                to.text_container.render(
+                    frame,
+                    &Default::default(),
+                    (0.5, 0.5, 0.5),
+                    (ratio * 2. - 2.0, 0.),
+                );
             }
             _ => {}
         }
@@ -255,6 +261,12 @@ impl IntermediateState for SecondToInit {
                     &Default::default(),
                     ((1. - ratio) * 2. - 2.0, 0.),
                     parent.resolution,
+                );
+                from.text_container.render(
+                    frame,
+                    &Default::default(),
+                    (0.5, 0.5, 0.5),
+                    ((1. - ratio) * 2. - 2.0, 0.),
                 );
             }
             _ => {}

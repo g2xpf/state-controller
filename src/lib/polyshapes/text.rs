@@ -9,8 +9,8 @@ pub struct Text {
     pub theta: f32,
 }
 
-const VSRC: &'static str = include_str!("text.vert");
-const FSRC: &'static str = include_str!("text.frag");
+const VSRC: &str = include_str!("text.vert");
+const FSRC: &str = include_str!("text.frag");
 
 #[derive(Copy, Clone)]
 pub struct Vertex {

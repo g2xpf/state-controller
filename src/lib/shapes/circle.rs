@@ -1,8 +1,8 @@
 use super::Shape;
 use glium::index::PrimitiveType;
 
-const VSRC: &'static str = include_str!("circle.vert");
-const FSRC: &'static str = include_str!("circle.frag");
+const VSRC: &str = include_str!("circle.vert");
+const FSRC: &str = include_str!("circle.frag");
 
 pub struct Circle {
     pub pos: [f32; 2],

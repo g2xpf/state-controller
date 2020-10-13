@@ -17,5 +17,5 @@ vec2 rotate(vec2 p) {
 
 void main() {
     v_coord = tex_coord;
-    gl_Position = vec4(pos + rotate(coord), 0.0, 1.0);
+    gl_Position = vec4(pos + rotate(coord) - camera_pos, 0.0, 1.0);
 }
