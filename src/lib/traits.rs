@@ -2,16 +2,16 @@ use crate::{event::Event, types::Shifter};
 use glium::Frame;
 use std::any::{Any, TypeId};
 
-pub trait Updatable {
-    fn update(&mut self, _shifter: &mut Shifter) {}
+pub trait Updatable<E = ()> {
+    fn update(&mut self, _shifter: &mut Shifter<E>) {}
 }
 
-pub trait Renderable {
-    fn render(&self, _shifter: &Shifter, _frame: &mut Frame) {}
+pub trait Renderable<E = ()> {
+    fn render(&self, _shifter: &Shifter<E>, _frame: &mut Frame) {}
 }
 
-pub trait EventHandler {
-    fn handle(&mut self, _event: &Event) {}
+pub trait EventHandler<E = ()> {
+    fn handle(&mut self, _event: &Event<E>) {}
 }
 
 pub struct TransitionEvidence;

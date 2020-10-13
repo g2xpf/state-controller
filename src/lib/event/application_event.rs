@@ -1,14 +1,14 @@
 #[derive(Debug, Copy, Clone)]
 pub struct ApplicationEvent {
     awakened: bool,
-    suspended: Option<bool>,
+    suspended: bool,
 }
 
 impl ApplicationEvent {
     pub fn new() -> Self {
         ApplicationEvent {
             awakened: false,
-            suspended: None,
+            suspended: false,
         }
     }
 
@@ -16,7 +16,7 @@ impl ApplicationEvent {
         self.awakened
     }
 
-    pub fn suspended(&self) -> Option<bool> {
+    pub fn suspended(&self) -> bool {
         self.suspended
     }
 
@@ -24,12 +24,12 @@ impl ApplicationEvent {
         self.awakened = true;
     }
 
-    pub fn set_suspended(&mut self, b: bool) {
-        self.suspended = Some(b);
+    pub fn set_suspended(&mut self) {
+        self.suspended = true;
     }
 
     pub fn reset(&mut self) {
         self.awakened = false;
-        self.suspended = None;
+        self.suspended = false;
     }
 }

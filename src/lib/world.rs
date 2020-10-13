@@ -5,18 +5,21 @@ use crate::{
     state::State,
     state_controller::StateController,
 };
-use glium::{glutin::EventsLoop, Display, Surface};
+use glium::{glutin::event_loop::EventLoop, Display};
 
-pub struct World<M> {
-    state_controller: StateController<M>,
-    event_controller: EventController,
+pub struct World<M, E: 'static> {
+    state_controller: StateController<M, E>,
+    event_controller: EventController<E>,
     display: Display,
 }
 
-impl World<Pending> {
-    pub fn new<S>(events_loop: EventsLoop, display: Display, initial_state: S) -> Self
+impl<E> World<Pending, E>
+where
+    E: 'static,
+{
+    pub fn new<S>(events_loop: EventLoop<E>, display: Display, initial_state: S) -> Self
     where
-        S: State + 'static,
+        S: State<E> + 'static,
     {
         World {
             state_controller: StateController::new::<S>(initial_state),
@@ -27,7 +30,7 @@ impl World<Pending> {
 
     pub fn register_state<S>(mut self, state: S) -> Self
     where
-        S: State + 'static,
+        S: State<E> + 'static,
     {
         self.state_controller.register_state(state);
         self
@@ -35,9 +38,9 @@ impl World<Pending> {
 
     pub fn try_register_transition<F, T, I>(mut self, intermediate_state: I) -> Option<Self>
     where
-        F: State,
-        T: State,
-        I: IntermediateState,
+        F: State<E>,
+        T: State<E>,
+        I: IntermediateState<E>,
     {
         if self
             .state_controller
@@ -51,15 +54,15 @@ impl World<Pending> {
 
     pub fn register_transition<F, T, I>(self, intermediate_state: I) -> Self
     where
-        F: State,
-        T: State,
-        I: IntermediateState,
+        F: State<E>,
+        T: State<E>,
+        I: IntermediateState<E>,
     {
         self.try_register_transition::<F, T, I>(intermediate_state)
             .unwrap()
     }
 
-    pub fn finalize(self) -> World<Running> {
+    pub fn finalize(self) -> World<Running, E> {
         World {
             state_controller: self.state_controller.run(),
             event_controller: self.event_controller,
@@ -68,24 +71,10 @@ impl World<Pending> {
     }
 }
 
-impl World<Running> {
-    pub fn run(&mut self) {
+impl<E: 'static> World<Running, E> {
+    pub fn run(mut self) {
         self.state_controller.initialize();
-        loop {
-            // event handling
-            self.event_controller.initialize();
-            self.event_controller.poll_events();
-            self.state_controller
-                .handle_events(&self.event_controller.event);
-
-            // update
-            self.state_controller.update();
-
-            // rendering
-            let mut frame = self.display.draw();
-            frame.clear_color(0.0, 0.0, 0.0, 1.0);
-            self.state_controller.render(&mut frame);
-            frame.finish().unwrap();
-        }
+        self.event_controller
+            .run(self.state_controller, self.display);
     }
 }

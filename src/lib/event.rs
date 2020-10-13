@@ -12,18 +12,19 @@ use window_event::WindowEvent;
 
 use crate::types::key::Key;
 
-use glium::glutin;
+use glium::glutin::event;
 
 #[derive(Debug)]
-pub struct Event {
+pub struct Event<T = ()> {
     key: KeyEvent,
     pub cursor: CursorEvent,
     pub motion: MotionEvent,
     pub window: WindowEvent,
     pub app: ApplicationEvent,
+    pub custom: Vec<T>,
 }
 
-impl Event {
+impl<T> Event<T> {
     pub fn new() -> Self {
         Event {
             key: KeyEvent::new(),
@@ -31,6 +32,7 @@ impl Event {
             motion: MotionEvent::new(),
             window: WindowEvent::new(),
             app: ApplicationEvent::new(),
+            custom: vec![],
         }
     }
 
@@ -39,7 +41,7 @@ impl Event {
     }
 
     pub fn text(&self) -> &str {
-        &self.key.text[..]
+        &self.key.text
     }
 
     pub fn reset(&mut self) {
@@ -50,49 +52,52 @@ impl Event {
         self.app.reset();
     }
 
-    pub fn register(&mut self, event: &glutin::Event) {
+    pub fn register(&mut self, event: &event::Event<'_, T>) {
         match event {
-            glutin::Event::WindowEvent { event, .. } => match event {
-                // key events
-                glutin::WindowEvent::ReceivedCharacter(c) => {
-                    self.key.register_text(*c);
-                }
-                glutin::WindowEvent::KeyboardInput { input, .. } => {
-                    self.key.register_key(input);
-                }
+            event::Event::WindowEvent { event, .. } => {
+                match event {
+                    // key events
+                    event::WindowEvent::ReceivedCharacter(c) => {
+                        self.key.register_text(*c);
+                    }
+                    event::WindowEvent::KeyboardInput { input, .. } => {
+                        self.key.register_key(input);
+                    }
 
-                // cursor events
-                glutin::WindowEvent::CursorEntered { .. } => {
-                    self.cursor.set_entered();
-                }
-                glutin::WindowEvent::CursorLeft { .. } => {
-                    self.cursor.set_left();
-                }
-                glutin::WindowEvent::CursorMoved { position, .. } => {
-                    self.cursor.set_position(position);
-                }
+                    // cursor events
+                    event::WindowEvent::CursorEntered { .. } => {
+                        self.cursor.set_entered();
+                    }
+                    event::WindowEvent::CursorLeft { .. } => {
+                        self.cursor.set_left();
+                    }
+                    event::WindowEvent::CursorMoved { position, .. } => {
+                        self.cursor.set_position(position);
+                    }
 
-                // window events
-                glutin::WindowEvent::CloseRequested => {
-                    self.window.set_close_requested();
+                    // window events
+                    event::WindowEvent::CloseRequested => {
+                        self.window.set_close_requested();
+                    }
+                    _ => (),
                 }
-                _ => (),
-            },
-            glutin::Event::DeviceEvent { event, .. } => match event {
+            }
+            event::Event::DeviceEvent { event, .. } => match event {
                 // motion events
-                glutin::DeviceEvent::MouseMotion { delta } => {
+                event::DeviceEvent::MouseMotion { delta } => {
                     self.motion.register_motion(delta);
                 }
                 _ => (),
             },
 
             // application events
-            glutin::Event::Awakened => {
+            event::Event::Resumed => {
                 self.app.set_awakened();
             }
-            glutin::Event::Suspended(b) => {
-                self.app.set_suspended(*b);
+            event::Event::Suspended => {
+                self.app.set_suspended();
             }
+            _ => {}
         }
     }
 

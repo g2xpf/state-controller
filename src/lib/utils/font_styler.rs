@@ -26,20 +26,17 @@ pub struct FontStyler<'a> {
 }
 
 impl<'a> FontStyler<'a> {
-    pub fn new(display: &Display, font: &'a [u8], logical_size: LogicalSize) -> Self {
+    pub fn new(
+        display: &Display,
+        font: &'a [u8],
+        logical_size: impl Into<LogicalSize<f64>>,
+    ) -> Self {
         let font = Font::from_bytes(font).unwrap();
-        let dpi_factor = display.gl_window().window().get_hidpi_factor() as f64;
-        let (inner_width, _) = display
-            .gl_window()
-            .window()
-            .get_inner_size()
-            .unwrap()
-            .to_physical(dpi_factor)
-            .into();
-        let (cache_width, cache_height) = (
-            (logical_size.width * dpi_factor) as u32,
-            (logical_size.height * dpi_factor) as u32,
-        );
+        let scale_factor = display.gl_window().window().scale_factor() as f64;
+        let logical_size = logical_size.into();
+        let physical_size = logical_size.to_physical(scale_factor);
+        let inner_width = physical_size.width;
+        let (cache_width, cache_height) = (physical_size.width, physical_size.height);
 
         FontStyler {
             display: display.clone(),
@@ -67,8 +64,8 @@ impl<'a> FontStyler<'a> {
     }
 
     pub fn set_wrap_bound(&mut self, bound: u32) {
-        let dpi_factor = self.display.gl_window().window().get_hidpi_factor();
-        self.wrap_bound = bound * dpi_factor as u32;
+        let scale_factor = self.display.gl_window().window().scale_factor();
+        self.wrap_bound = bound * scale_factor as u32;
     }
 
     pub fn set_font_size(&mut self, font_size: f32) {
@@ -77,8 +74,8 @@ impl<'a> FontStyler<'a> {
 
     pub fn layout_paragraph(&mut self) {
         use unicode_normalization::UnicodeNormalization;
-        let dpi_factor = self.display.gl_window().window().get_hidpi_factor();
-        let scale = Scale::uniform(self.font_size * dpi_factor as f32);
+        let scale_factor = self.display.gl_window().window().scale_factor();
+        let scale = Scale::uniform(self.font_size * scale_factor as f32);
         let mut glyphs = Vec::new();
         let v_metrics = self.font.v_metrics(scale);
         let advance_height = v_metrics.ascent - v_metrics.descent + v_metrics.line_gap;

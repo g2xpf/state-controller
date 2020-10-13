@@ -12,18 +12,21 @@ use std::{
     cell::{Ref, RefMut},
 };
 
-pub trait State: Updatable + Renderable + EventHandler + Any + 'static {
+pub trait State<E = ()>: Updatable<E> + Renderable<E> + EventHandler<E> + Any + 'static
+where
+    E: 'static,
+{
     // run when transitioning to this state
     fn initialize(&mut self) {}
 
     // run when transitioning to this state
     fn finalize(&mut self) {}
 
-    fn shift<S>(&self, shifter: &mut Shifter)
+    fn shift<S>(&self, shifter: &mut Shifter<E>)
     where
         Self: Sized,
-        S: State + 'static,
-        S: Receiver<Self>,
+        S: State<E> + 'static,
+        S: Receiver<Self, E>,
     {
         if shifter.next_state.is_some() {
             panic!("Cannot set the next state twice");
@@ -50,11 +53,11 @@ pub trait State: Updatable + Renderable + EventHandler + Any + 'static {
     }
 
     // shift to the other state
-    fn shift_with<S>(&self, shifter: &mut Shifter, message: S::Message)
+    fn shift_with<S>(&self, shifter: &mut Shifter<E>, message: S::Message)
     where
         Self: Sized,
-        S: State + 'static,
-        S: Receiver<Self>,
+        S: State<E> + 'static,
+        S: Receiver<Self, E>,
     {
         if shifter.next_state.is_some() {
             panic!("Cannot set the next state twice");
@@ -87,10 +90,10 @@ pub trait State: Updatable + Renderable + EventHandler + Any + 'static {
         shifter.next_state = Some(StateEntry(next_state_id, next_state));
     }
 
-    fn parent_ref<'a, P>(&self, shifter: &'a Shifter) -> StateRef<'a, P>
+    fn parent_ref<'a, P>(&self, shifter: &'a Shifter<E>) -> StateRef<'a, P>
     where
         Self: Sized,
-        P: Parent<Self>,
+        P: Parent<Self, E>,
     {
         let parent = shifter
             .get::<P>()
@@ -99,10 +102,10 @@ pub trait State: Updatable + Renderable + EventHandler + Any + 'static {
         Ref::map(parent, |s| s.downcast_ref::<P>().unwrap())
     }
 
-    fn parent_mut<'a, P>(&self, shifter: &'a mut Shifter) -> StateRefMut<'a, P>
+    fn parent_mut<'a, P>(&self, shifter: &'a mut Shifter<E>) -> StateRefMut<'a, P>
     where
         Self: Sized,
-        P: Parent<Self>,
+        P: Parent<Self, E>,
     {
         let parent = shifter
             .get::<P>()
@@ -112,25 +115,25 @@ pub trait State: Updatable + Renderable + EventHandler + Any + 'static {
     }
 }
 
-impl dyn State {
+impl<E: 'static> dyn State<E> {
     #[inline]
-    pub fn is<S: State>(&self) -> bool {
+    pub fn is<S: State<E>>(&self) -> bool {
         StateID::of::<S>() == Any::type_id(self)
     }
 
     #[inline]
-    pub fn downcast_ref<S: State + 'static>(&self) -> Option<&S> {
+    pub fn downcast_ref<S: State<E> + 'static>(&self) -> Option<&S> {
         if self.is::<S>() {
-            unsafe { Some(&*(self as *const dyn State as *const S)) }
+            unsafe { Some(&*(self as *const dyn State<E> as *const S)) }
         } else {
             None
         }
     }
 
     #[inline]
-    pub fn downcast_mut<S: State>(&mut self) -> Option<&mut S> {
+    pub fn downcast_mut<S: State<E>>(&mut self) -> Option<&mut S> {
         if self.is::<S>() {
-            unsafe { Some(&mut *(self as *mut dyn State as *mut S)) }
+            unsafe { Some(&mut *(self as *mut dyn State<E> as *mut S)) }
         } else {
             None
         }

@@ -1,8 +1,9 @@
 use crate::state::State;
 
-pub trait Receiver<Sender>: State
+pub trait Receiver<Sender, E = ()>: State<E>
 where
-    Sender: State,
+    Sender: State<E>,
+    E: 'static,
 {
     type Message: Clone;
 

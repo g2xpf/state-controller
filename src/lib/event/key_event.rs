@@ -1,5 +1,5 @@
-use crate::types::key::{virtual_keycode_to_key, Key};
-use glium::glutin;
+use crate::types::key::Key;
+use glium::glutin::event;
 use std::fmt;
 
 const CODE_KINDS: usize = 161;
@@ -84,19 +84,19 @@ impl KeyEvent {
         &self.keys[key as usize]
     }
 
-    pub fn register_key(&mut self, keyboard_input: &glutin::KeyboardInput) {
+    pub fn register_key(&mut self, keyboard_input: &event::KeyboardInput) {
         if let Some(key_code) = keyboard_input.virtual_keycode {
-            self.changed.push(virtual_keycode_to_key(key_code));
+            self.changed.push(key_code);
             let key_entry = &mut self.keys[key_code as usize];
 
             match keyboard_input.state {
-                glutin::ElementState::Pressed => {
+                event::ElementState::Pressed => {
                     if !key_entry.pressed {
                         key_entry.down_times += 1;
                     }
                     key_entry.pressed = true;
                 }
-                glutin::ElementState::Released => {
+                event::ElementState::Released => {
                     if key_entry.pressed {
                         key_entry.up_times += 1;
                     }

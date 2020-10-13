@@ -1,7 +1,8 @@
 use crate::state::State;
 
-pub trait Parent<P>: State
+pub trait Parent<P, E = ()>: State<E>
 where
-    P: State,
+    P: State<E>,
+    E: 'static,
 {
 }

@@ -9,19 +9,20 @@ use crate::{
         TransitionFlow,
     },
 };
+use glium::glutin::event_loop::ControlFlow;
 use glium::Frame;
 use std::{cell::RefCell, mem, rc::Rc};
 
-pub struct StateController<T> {
-    state_shifter: StateShifter<T>,
-    current_state: StateEntry,
-    current_intermediate_state: Option<IntermediateStateEntry>,
+pub struct StateController<M, E> {
+    state_shifter: StateShifter<M, E>,
+    current_state: StateEntry<E>,
+    current_intermediate_state: Option<IntermediateStateEntry<E>>,
 }
 
-impl StateController<Pending> {
+impl<E: 'static> StateController<Pending, E> {
     pub fn new<S>(initial_state: S) -> Self
     where
-        S: State + 'static,
+        S: State<E>,
     {
         let initial_state = Rc::new(RefCell::new(initial_state));
         StateController {
@@ -33,7 +34,7 @@ impl StateController<Pending> {
 
     pub fn register_state<S>(&mut self, state: S)
     where
-        S: State + 'static,
+        S: State<E>,
     {
         self.state_shifter
             .register_state(Rc::new(RefCell::new(state)));
@@ -41,15 +42,15 @@ impl StateController<Pending> {
 
     pub fn try_register_transition<F, T, I>(&mut self, intermediate_state: I) -> bool
     where
-        F: State,
-        T: State,
-        I: IntermediateState,
+        F: State<E>,
+        T: State<E>,
+        I: IntermediateState<E>,
     {
         self.state_shifter
             .try_register_transition::<F, T, I>(intermediate_state)
     }
 
-    pub fn run(self) -> StateController<Running> {
+    pub fn run(self) -> StateController<Running, E> {
         StateController {
             state_shifter: self.state_shifter.run(),
             current_state: self.current_state,
@@ -58,8 +59,8 @@ impl StateController<Pending> {
     }
 }
 
-impl StateController<Running> {
-    pub(crate) fn handle_events(&mut self, event: &Event) {
+impl<E: 'static> StateController<Running, E> {
+    pub(crate) fn handle_events(&mut self, event: &Event<E>) {
         if let Some(IntermediateStateEntry(_, ref mut intermediate_state)) =
             self.current_intermediate_state
         {
@@ -73,7 +74,7 @@ impl StateController<Running> {
         self.current_state.borrow_mut().initialize();
     }
 
-    pub fn update(&mut self) {
+    pub fn update(&mut self) -> ControlFlow {
         if let Some(IntermediateStateEntry(_, ref mut intermediate_state)) =
             self.current_intermediate_state
         {
@@ -84,10 +85,9 @@ impl StateController<Running> {
                     self.state_shifter
                         .insert_intermediate_state_entry(intermediate_state);
                 }
+                TransitionFlow::Exit => return ControlFlow::Exit,
                 TransitionFlow::Continue => {}
             }
-
-            return;
         }
 
         self.current_state
@@ -104,6 +104,8 @@ impl StateController<Running> {
         if let Some(intermediate_state) = self.state_shifter.next_intermediate_state.take() {
             self.current_intermediate_state = Some(intermediate_state);
         }
+
+        ControlFlow::default()
     }
 
     pub fn render(&mut self, frame: &mut Frame) {

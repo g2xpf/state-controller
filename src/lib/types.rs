@@ -10,9 +10,9 @@ pub mod state_entry;
 mod transition_flow;
 
 pub use transition_flow::TransitionFlow;
-pub type Position = glium::glutin::dpi::LogicalPosition;
-pub type Shifter = StateShifter<Running>;
-pub type SharedState = Rc<RefCell<dyn State>>;
+pub type Position = glium::glutin::dpi::PhysicalPosition<f64>;
+pub type Shifter<E = ()> = StateShifter<Running, E>;
+pub type SharedState<T> = Rc<RefCell<dyn State<T>>>;
 pub type StateRef<'a, S> = Ref<'a, S>;
 pub type StateRefMut<'a, S> = RefMut<'a, S>;
 pub trait Transitionable {}

@@ -9,15 +9,15 @@ use std::{
     rc::Rc,
 };
 macro_rules! impl_entry_deref {
-    ($type: ty, $target: ty) => {
-        impl Deref for $type {
+    ($type: tt, $target: ty) => {
+        impl<T> Deref for $type<T> {
             type Target = $target;
             fn deref(&self) -> &Self::Target {
                 &self.1
             }
         }
 
-        impl DerefMut for $type {
+        impl<T> DerefMut for $type<T> {
             fn deref_mut(&mut self) -> &mut Self::Target {
                 &mut self.1
             }
@@ -25,22 +25,22 @@ macro_rules! impl_entry_deref {
     };
 }
 
-pub(crate) struct StateEntry(pub(crate) StateID, pub(crate) SharedState);
+pub(crate) struct StateEntry<T>(pub(crate) StateID, pub(crate) SharedState<T>);
 
-impl StateEntry {
+impl<T: 'static> StateEntry<T> {
     pub fn new<S>(state: Rc<RefCell<S>>) -> Self
     where
-        S: State + 'static,
+        S: State<T>,
     {
         StateEntry(StateID::of::<S>(), state)
     }
 }
 
-impl_entry_deref!(StateEntry, SharedState);
+impl_entry_deref!(StateEntry, SharedState<T>);
 
-pub(crate) struct IntermediateStateEntry(
+pub(crate) struct IntermediateStateEntry<T>(
     pub(crate) IntermediateStateID,
-    pub(crate) Box<dyn IntermediateState>,
+    pub(crate) Box<dyn IntermediateState<T>>,
 );
 
-impl_entry_deref!(IntermediateStateEntry, Box<dyn IntermediateState>);
+impl_entry_deref!(IntermediateStateEntry, Box<dyn IntermediateState<T>>);

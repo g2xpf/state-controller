@@ -3,6 +3,7 @@ extern crate state_controller;
 extern crate image;
 
 use glium::{glutin, Frame};
+use glutin::{event_loop, window};
 use state_controller::{
     primitive_shape::{Circle, Rectangle, Text, Texture},
     utils::{EaseInOutSin, EaseOutBounce, FontStyler, Timer},
@@ -264,10 +265,10 @@ impl IntermediateState for SecondToInit {
 impl<T> Parent<T> for Global where T: State {}
 
 fn main() {
-    let events_loop = glutin::EventsLoop::new();
+    let events_loop = event_loop::EventLoop::new();
     let window_size = glutin::dpi::LogicalSize::new(640f64, 640f64);
-    let window = glutin::WindowBuilder::new()
-        .with_dimensions(window_size)
+    let window = window::WindowBuilder::new()
+        .with_inner_size(window_size)
         .with_title("GLWindow");
     let ctx = glutin::ContextBuilder::new().with_vsync(true);
     let display = glium::Display::new(window, ctx, &events_loop).unwrap();
@@ -307,7 +308,7 @@ fn main() {
     let font_styler = FontStyler::new(
         &display,
         include_bytes!("../static/GenRyuMinJP-Regular.ttf"),
-        (640., 640.).into(),
+        (640.0f64, 640.0f64),
     );
 
     let mut text_container = PolyShapeContainer::<Text>::new(&display);
@@ -345,7 +346,7 @@ fn main() {
         transition: Transition::new(),
     };
 
-    let mut world = World::new(events_loop, display, init_state)
+    let world = World::new(events_loop, display, init_state)
         .register_state(second_state)
         .register_state(global)
         .register_transition::<InitState, SecondState, _>(init_to_second)

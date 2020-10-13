@@ -1,5 +1,6 @@
 extern crate state_controller;
 
+use glium::glutin::{event_loop, window};
 use glium::Frame;
 use state_controller::{EventHandler, Renderable, Shifter, State, Updatable, World};
 
@@ -34,15 +35,15 @@ fn one_state() {
     std::thread::sleep(std::time::Duration::from_millis(1000));
 
     use glium::glutin;
-    let events_loop = glutin::EventsLoop::new();
+    let events_loop = event_loop::EventLoop::new();
     let window_size = glutin::dpi::LogicalSize::new(640f64, 640f64);
-    let window = glutin::WindowBuilder::new()
-        .with_dimensions(window_size)
+    let window = window::WindowBuilder::new()
+        .with_inner_size(window_size)
         .with_title("Main");
     let ctx = glutin::ContextBuilder::new().with_vsync(true);
     let display = glium::Display::new(window, ctx, &events_loop).unwrap();
 
     let init_state: InitState = Default::default();
-    let mut world = World::new(events_loop, display, init_state).finalize();
+    let world = World::new(events_loop, display, init_state).finalize();
     world.run();
 }
