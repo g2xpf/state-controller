@@ -2,22 +2,16 @@
 name = "state-controller"
 version = "0.1.0"
 authors = ["g2_xpf <nameko.jack@gmail.com>"]
-edition = "2018"
-
-[[bin]]
-name = "game"
-path = "src/main.rs"
-
-[lib]
-name = "state_controller"
-path = "src/lib/lib.rs"
+edition = "2021"
 
 [dependencies]
-glium = "0.25.1"
-cgmath = "0.17.0"
-image = "0.21.0"
+glium = "0.31.0"
+cgmath = "0.18.0"
+image = "0.23.0"
 unicode-normalization = "0.1"
+rusttype = { version = "0.9", features = ["gpu_cache"] }
 
-[dependencies.rusttype]
-version = "0.8.0"
-features = ["gpu_cache"]
+log = "0.4.0"
+
+[dev-dependencies]
+env_logger = "0.8.4"
